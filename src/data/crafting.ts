@@ -191,6 +191,298 @@ const woodSet: CraftingRecipe[] = [
   }
 ];
 
+// Copper Set recipes
+const copperSet: CraftingRecipe[] = [
+  {
+    id: 'copper_helmet',
+    name: 'Copper Helmet',
+    description: 'A sturdy copper helmet.',
+    category: 'equipment',
+    ingredients: ['copper_bar', 'leather'],
+    result: getItemById('copper_helmet') || {
+      id: 'copper_helmet',
+      name: 'Copper Helmet',
+      description: 'A sturdy copper helmet.',
+      type: 'equipment',
+      value: 120,
+      rarity: 'uncommon',
+      stackable: false,
+      maxStackSize: 1,
+      imageUrl: 'public/assets/items/copper_helmet.png',
+      equipmentSlot: 'head',
+      stats: {
+        mining: 3,
+        energy: 2
+      }
+    }
+  },
+  {
+    id: 'copper_chestplate',
+    name: 'Copper Chestplate',
+    description: 'A protective copper chestplate.',
+    category: 'equipment',
+    ingredients: ['copper_bar', 'copper_bar'],
+    result: getItemById('copper_chestplate') || {
+      id: 'copper_chestplate',
+      name: 'Copper Chestplate',
+      description: 'A protective copper chestplate.',
+      type: 'equipment',
+      value: 180,
+      rarity: 'uncommon',
+      stackable: false,
+      maxStackSize: 1,
+      imageUrl: 'public/assets/items/copper_chestplate.png',
+      equipmentSlot: 'torso',
+      stats: {
+        mining: 4,
+        energy: 3
+      }
+    }
+  },
+  {
+    id: 'copper_leggings',
+    name: 'Copper Leggings',
+    description: 'Durable copper leg protection.',
+    category: 'equipment',
+    ingredients: ['copper_bar', 'leather'],
+    result: getItemById('copper_leggings') || {
+      id: 'copper_leggings',
+      name: 'Copper Leggings',
+      description: 'Durable copper leg protection.',
+      type: 'equipment',
+      value: 150,
+      rarity: 'uncommon',
+      stackable: false,
+      maxStackSize: 1,
+      imageUrl: 'public/assets/items/copper_leggings.png',
+      equipmentSlot: 'legs',
+      stats: {
+        mining: 3,
+        speed: 2
+      }
+    }
+  },
+  {
+    id: 'copper_boots',
+    name: 'Copper Boots',
+    description: 'Sturdy copper boots.',
+    category: 'equipment',
+    ingredients: ['copper_bar', 'leather'],
+    result: getItemById('copper_boots') || {
+      id: 'copper_boots',
+      name: 'Copper Boots',
+      description: 'Sturdy copper boots.',
+      type: 'equipment',
+      value: 100,
+      rarity: 'uncommon',
+      stackable: false,
+      maxStackSize: 1,
+      imageUrl: 'public/assets/items/copper_boots.png',
+      equipmentSlot: 'boots',
+      stats: {
+        mining: 2,
+        speed: 3
+      }
+    }
+  }
+];
+
+// Iron Set recipes
+const ironSet: CraftingRecipe[] = [
+  {
+    id: 'iron_helmet',
+    name: 'Iron Helmet',
+    description: 'A strong iron helmet.',
+    category: 'equipment',
+    ingredients: ['iron_bar', 'leather'],
+    result: getItemById('iron_helmet') || {
+      id: 'iron_helmet',
+      name: 'Iron Helmet',
+      description: 'A strong iron helmet.',
+      type: 'equipment',
+      value: 240,
+      rarity: 'rare',
+      stackable: false,
+      maxStackSize: 1,
+      imageUrl: 'public/assets/items/iron_helmet.png',
+      equipmentSlot: 'head',
+      stats: {
+        mining: 5,
+        energy: 4
+      }
+    }
+  },
+  {
+    id: 'iron_chestplate',
+    name: 'Iron Chestplate',
+    description: 'A durable iron chestplate.',
+    category: 'equipment',
+    ingredients: ['iron_bar', 'iron_bar'],
+    result: getItemById('iron_chestplate') || {
+      id: 'iron_chestplate',
+      name: 'Iron Chestplate',
+      description: 'A durable iron chestplate.',
+      type: 'equipment',
+      value: 360,
+      rarity: 'rare',
+      stackable: false,
+      maxStackSize: 1,
+      imageUrl: 'public/assets/items/iron_chestplate.png',
+      equipmentSlot: 'torso',
+      stats: {
+        mining: 6,
+        energy: 5
+      }
+    }
+  },
+  {
+    id: 'iron_leggings',
+    name: 'Iron Leggings',
+    description: 'Strong iron leg protection.',
+    category: 'equipment',
+    ingredients: ['iron_bar', 'leather'],
+    result: getItemById('iron_leggings') || {
+      id: 'iron_leggings',
+      name: 'Iron Leggings',
+      description: 'Strong iron leg protection.',
+      type: 'equipment',
+      value: 300,
+      rarity: 'rare',
+      stackable: false,
+      maxStackSize: 1,
+      imageUrl: 'public/assets/items/iron_leggings.png',
+      equipmentSlot: 'legs',
+      stats: {
+        mining: 5,
+        speed: 4
+      }
+    }
+  },
+  {
+    id: 'iron_boots',
+    name: 'Iron Boots',
+    description: 'Durable iron boots.',
+    category: 'equipment',
+    ingredients: ['iron_bar', 'leather'],
+    result: getItemById('iron_boots') || {
+      id: 'iron_boots',
+      name: 'Iron Boots',
+      description: 'Durable iron boots.',
+      type: 'equipment',
+      value: 200,
+      rarity: 'rare',
+      stackable: false,
+      maxStackSize: 1,
+      imageUrl: 'public/assets/items/iron_boots.png',
+      equipmentSlot: 'boots',
+      stats: {
+        mining: 4,
+        speed: 5
+      }
+    }
+  }
+];
+
+// Tungsten Set recipes
+const tungstenSet: CraftingRecipe[] = [
+  {
+    id: 'tungsten_helmet',
+    name: 'Tungsten Helmet',
+    description: 'An exceptional tungsten helmet.',
+    category: 'equipment',
+    ingredients: ['tungsten_bar', 'leather'],
+    result: getItemById('tungsten_helmet') || {
+      id: 'tungsten_helmet',
+      name: 'Tungsten Helmet',
+      description: 'An exceptional tungsten helmet.',
+      type: 'equipment',
+      value: 800,
+      rarity: 'epic',
+      stackable: false,
+      maxStackSize: 1,
+      imageUrl: 'public/assets/items/tungsten_helmet.png',
+      equipmentSlot: 'head',
+      stats: {
+        mining: 8,
+        energy: 7,
+        luck: 2
+      }
+    }
+  },
+  {
+    id: 'tungsten_chestplate',
+    name: 'Tungsten Chestplate',
+    description: 'A masterwork tungsten chestplate.',
+    category: 'equipment',
+    ingredients: ['tungsten_bar', 'tungsten_bar'],
+    result: getItemById('tungsten_chestplate') || {
+      id: 'tungsten_chestplate',
+      name: 'Tungsten Chestplate',
+      description: 'A masterwork tungsten chestplate.',
+      type: 'equipment',
+      value: 1200,
+      rarity: 'epic',
+      stackable: false,
+      maxStackSize: 1,
+      imageUrl: 'public/assets/items/tungsten_chestplate.png',
+      equipmentSlot: 'torso',
+      stats: {
+        mining: 10,
+        energy: 8,
+        luck: 3
+      }
+    }
+  },
+  {
+    id: 'tungsten_leggings',
+    name: 'Tungsten Leggings',
+    description: 'Superior tungsten leg protection.',
+    category: 'equipment',
+    ingredients: ['tungsten_bar', 'leather'],
+    result: getItemById('tungsten_leggings') || {
+      id: 'tungsten_leggings',
+      name: 'Tungsten Leggings',
+      description: 'Superior tungsten leg protection.',
+      type: 'equipment',
+      value: 1000,
+      rarity: 'epic',
+      stackable: false,
+      maxStackSize: 1,
+      imageUrl: 'public/assets/items/tungsten_leggings.png',
+      equipmentSlot: 'legs',
+      stats: {
+        mining: 8,
+        speed: 7,
+        luck: 2
+      }
+    }
+  },
+  {
+    id: 'tungsten_boots',
+    name: 'Tungsten Boots',
+    description: 'Exceptional tungsten boots.',
+    category: 'equipment',
+    ingredients: ['tungsten_bar', 'leather'],
+    result: getItemById('tungsten_boots') || {
+      id: 'tungsten_boots',
+      name: 'Tungsten Boots',
+      description: 'Exceptional tungsten boots.',
+      type: 'equipment',
+      value: 700,
+      rarity: 'epic',
+      stackable: false,
+      maxStackSize: 1,
+      imageUrl: 'public/assets/items/tungsten_boots.png',
+      equipmentSlot: 'boots',
+      stats: {
+        mining: 7,
+        speed: 8,
+        luck: 2
+      }
+    }
+  }
+];
+
 // Consumable recipes
 const consumables: CraftingRecipe[] = [
   {
@@ -321,6 +613,9 @@ const relics: CraftingRecipe[] = [
 export const craftingRecipes: CraftingRecipe[] = [
   ...components,
   ...woodSet,
+  ...copperSet,
+  ...ironSet,
+  ...tungstenSet,
   ...consumables,
   ...meals,
   ...relics
