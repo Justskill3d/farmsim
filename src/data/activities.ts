@@ -62,20 +62,23 @@ export const activities: ActivityDetails[] = [
     timeCost: 45,
     iconName: 'Leaf',
     possibleItems: [
-      'dry_leave','hide',
+      'dry_leave', 'hide', 'water',
       'wild_horseradish', 'spring_onion', 'blackberry', 'mushroom', 'truffle',
-      'golden_walnut', 'wood', 'hardwood', 'fiber'
-    ]
+      'golden_walnut', 'wood', 'hardwood', 'fiber',
+      'herbs', 'wild_garlic', 'bay_leaf'
+    ],
+    requiredTool: 'axe'
   },
   {
     id: 'cooking',
     name: 'Cooking',
-    description: 'Prepare delicious meals from ingredients.',
+    description: 'Discover new recipes and prepare meals.',
     energyCost: 3,
     timeCost: 40,
     iconName: 'Utensils',
     possibleItems: [
-      'fried_egg', 'hashbrowns', 'complete_breakfast', 'lucky_lunch', 'seafood_gumbo'
+      'flour', 'butter', 'oil', 'sugar', 'rice'
+      
     ]
   }
 ];

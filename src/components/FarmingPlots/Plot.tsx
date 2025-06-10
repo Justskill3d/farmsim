@@ -287,6 +287,15 @@ const Plot: React.FC<PlotProps> = ({ plot, onSelect, isWateringMode }) => {
           amount: 5 
         }
       });
+
+      dispatch({
+        type: 'SHOW_NOTIFICATION',
+        payload: {
+          title: 'Dead Plant Cleared',
+          message: 'The dead plant has been cleared from the plot.',
+          type: 'success'
+        }
+      });
     }
   };
 

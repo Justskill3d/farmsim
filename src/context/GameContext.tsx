@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer } from 'react';
 import { tools } from '../data/items';
 import { getRandomPerks } from '../data/perks';
+import { getTreasureLoot, applyItemEffects } from '../utils/itemUtils';
 
 interface GameState {
   day: number;
@@ -74,8 +75,212 @@ const calculateLevel = (experience: number): number => {
   return Math.floor(Math.sqrt(experience / 100)) + 1;
 };
 
+const getNextSeason = (currentSeason: string): string => {
+  const seasons = ['spring', 'summer', 'fall', 'winter'];
+  const currentIndex = seasons.indexOf(currentSeason);
+  return seasons[(currentIndex + 1) % 4];
+};
+
+const getSeasonalWeather = (season: string): Weather[] => {
+  switch (season) {
+    case 'winter':
+      return ['snowy', 'stormy'];
+    case 'spring':
+      return ['sunny', 'rainy'];
+    case 'summer':
+      return ['sunny', 'stormy'];
+    case 'fall':
+      return ['sunny', 'rainy', 'stormy'];
+    default:
+      return ['sunny', 'rainy'];
+  }
+};
+
+const endDay = (state: GameState): GameState => {
+  const newDay = state.day + 1;
+  let newSeason = state.season;
+  let newYear = state.year;
+
+  if (newDay % 25 === 1) {
+    newSeason = getNextSeason(state.season);
+    if (newSeason === 'spring') {
+      newYear++;
+    }
+  }
+
+  const weatherOptions = getSeasonalWeather(newSeason);
+  const newWeather = weatherOptions[Math.floor(Math.random() * weatherOptions.length)];
+  
+  const updatedPlots = state.plots.map(plot => {
+    if (newSeason === 'winter' && (plot.state === 'seeded' || plot.state === 'growing')) {
+      return { ...plot, state: 'dead' };
+    }
+    
+    if (plot.state === 'seeded' || plot.state === 'growing') {
+      const willBeWatered = newWeather === 'rainy' || newWeather === 'stormy';
+      
+      if (plot.waterLevel === 0 && !willBeWatered) {
+        return { ...plot, state: 'dead' };
+      }
+      
+      const daysPassed = newDay - (plot.plantedDay || 0);
+      if (daysPassed >= (plot.daysToMature || 0)) {
+        return { ...plot, state: 'mature', waterLevel: 0 };
+      }
+      
+      return { 
+        ...plot, 
+        state: 'growing', 
+        waterLevel: willBeWatered ? 1 : 0 
+      };
+    }
+    return { ...plot, waterLevel: 0 };
+  });
+
+  return {
+    ...state,
+    day: newDay,
+    season: newSeason,
+    year: newYear,
+    time: 360,
+    energy: state.maxEnergy,
+    weather: newWeather,
+    plots: updatedPlots,
+    activeActivity: null,
+    notification: {
+      title: 'Day Ended',
+      message: `Welcome to day ${newDay}!`,
+      type: 'info'
+    }
+  };
+};
+
 const gameReducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
+    case 'ADVANCE_TIME': {
+      const newTime = state.time + action.payload;
+      if (newTime >= 1080) { // 18:00 (6 PM)
+        return endDay(state);
+      }
+      return {
+        ...state,
+        time: newTime
+      };
+    }
+
+    case 'END_DAY':
+      return endDay(state);
+
+    case 'TILL_PLOT': {
+      const newPlots = [...state.plots];
+      const plotIndex = newPlots.findIndex(plot => plot.id === action.payload);
+      if (plotIndex !== -1) {
+        newPlots[plotIndex] = {
+          ...newPlots[plotIndex],
+          state: 'tilled'
+        };
+      }
+      return {
+        ...state,
+        plots: newPlots
+      };
+    }
+
+    case 'PLANT_SEED': {
+      const { plotId, seedId, daysToMature, plantedDay } = action.payload;
+      const newPlots = [...state.plots];
+      const plotIndex = newPlots.findIndex(plot => plot.id === plotId);
+      
+      if (plotIndex !== -1) {
+        newPlots[plotIndex] = {
+          ...newPlots[plotIndex],
+          state: 'seeded',
+          seedId,
+          daysToMature,
+          plantedDay
+        };
+      }
+      
+      return {
+        ...state,
+        plots: newPlots
+      };
+    }
+
+    case 'WATER_PLOT': {
+      const newPlots = [...state.plots];
+      const plotIndex = newPlots.findIndex(plot => plot.id === action.payload);
+      if (plotIndex !== -1) {
+        newPlots[plotIndex] = {
+          ...newPlots[plotIndex],
+          waterLevel: 1
+        };
+      }
+      return {
+        ...state,
+        plots: newPlots
+      };
+    }
+
+    case 'HARVEST_PLOT': {
+      const newPlots = [...state.plots];
+      const plotIndex = newPlots.findIndex(plot => plot.id === action.payload);
+      if (plotIndex !== -1) {
+        newPlots[plotIndex] = {
+          ...newPlots[plotIndex],
+          state: 'untilled',
+          seedId: undefined,
+          plantedDay: undefined,
+          daysToMature: undefined,
+          waterLevel: 0,
+          fertilized: false
+        };
+      }
+      return {
+        ...state,
+        plots: newPlots
+      };
+    }
+
+    case 'CLEAR_DEAD_PLOT': {
+      const newPlots = [...state.plots];
+      const plotIndex = newPlots.findIndex(plot => plot.id === action.payload);
+      if (plotIndex !== -1) {
+        newPlots[plotIndex] = {
+          ...newPlots[plotIndex],
+          state: 'untilled',
+          seedId: undefined,
+          plantedDay: undefined,
+          daysToMature: undefined,
+          waterLevel: 0,
+          fertilized: false
+        };
+      }
+      return {
+        ...state,
+        plots: newPlots
+      };
+    }
+
+    case 'UPGRADE_TOOL': {
+      const { toolId, newTier } = action.payload;
+      const newInventory = [...state.inventory];
+      const toolIndex = newInventory.findIndex(item => item?.id === toolId);
+      
+      if (toolIndex !== -1 && newInventory[toolIndex]) {
+        newInventory[toolIndex] = {
+          ...newInventory[toolIndex]!,
+          tier: newTier,
+          name: `${newTier.charAt(0).toUpperCase() + newTier.slice(1)} ${newInventory[toolIndex]!.name.split(' ').slice(1).join(' ')}`
+        };
+      }
+      
+      return {
+        ...state,
+        inventory: newInventory
+      };
+    }
+
     case 'EQUIP_ITEM': {
       const { item, slot } = action.payload;
       const newInventory = [...state.inventory];
@@ -145,6 +350,47 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       };
     }
 
+    case 'USE_ITEM': {
+      const item = action.payload;
+      
+      // Remove the item from inventory
+      const newInventory = [...state.inventory];
+      const itemIndex = newInventory.findIndex(i => i?.slotId === item.slotId);
+      
+      if (itemIndex === -1) return state;
+      
+      if (item.quantity > 1) {
+        newInventory[itemIndex] = {
+          ...item,
+          quantity: item.quantity - 1
+        };
+      } else {
+        newInventory[itemIndex] = null;
+      }
+      
+      // Apply item effects
+      let newState = applyItemEffects({ ...state, inventory: newInventory }, item);
+      
+      // Show notification
+      let message = '';
+      if (item.effects?.energy) {
+        message = `Restored ${item.effects.energy} energy`;
+      } else if (item.effects?.experience) {
+        message = `Gained ${item.effects.experience} experience`;
+      } else if (item.effects?.skillBonus) {
+        message = `Gained ${item.effects.skillBonus.amount} ${item.effects.skillBonus.skill} experience`;
+      }
+      
+      return {
+        ...newState,
+        notification: {
+          title: 'Item Used',
+          message,
+          type: 'success'
+        }
+      };
+    }
+
     case 'SAVE_GAME': {
       const saveData = JSON.stringify(state);
       localStorage.setItem('gameState', saveData);
@@ -193,147 +439,6 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       }
     }
 
-    case 'TILL_PLOT': {
-      const plotId = action.payload;
-      const newPlots = state.plots.map(plot => 
-        plot.id === plotId ? { ...plot, state: 'tilled' } : plot
-      );
-      
-      return {
-        ...state,
-        plots: newPlots
-      };
-    }
-
-    case 'PLANT_SEED': {
-      const { plotId, seedId, daysToMature, plantedDay } = action.payload;
-      const newPlots = state.plots.map(plot =>
-        plot.id === plotId ? {
-          ...plot,
-          state: 'seeded',
-          seedId,
-          daysToMature,
-          plantedDay
-        } : plot
-      );
-
-      return {
-        ...state,
-        plots: newPlots
-      };
-    }
-
-    case 'WATER_PLOT': {
-      const plotId = action.payload;
-      const newPlots = state.plots.map(plot =>
-        plot.id === plotId ? { ...plot, waterLevel: 1 } : plot
-      );
-
-      return {
-        ...state,
-        plots: newPlots
-      };
-    }
-
-    case 'HARVEST_PLOT': {
-      const plotId = action.payload;
-      const newPlots = state.plots.map(plot =>
-        plot.id === plotId ? {
-          ...plot,
-          state: 'untilled',
-          seedId: undefined,
-          plantedDay: undefined,
-          daysToMature: undefined,
-          waterLevel: 0,
-          fertilized: false
-        } : plot
-      );
-
-      return {
-        ...state,
-        plots: newPlots
-      };
-    }
-
-    case 'CLEAR_DEAD_PLOT': {
-      const plotId = action.payload;
-      const newPlots = state.plots.map(plot =>
-        plot.id === plotId ? {
-          ...plot,
-          state: 'untilled',
-          seedId: undefined,
-          plantedDay: undefined,
-          daysToMature: undefined,
-          waterLevel: 0,
-          fertilized: false
-        } : plot
-      );
-
-      return {
-        ...state,
-        plots: newPlots
-      };
-    }
-
-    case 'END_DAY': {
-      const newDay = state.day + 1;
-      const weatherTypes: Weather[] = ['sunny', 'rainy', 'stormy', 'snowy'];
-      const newWeather = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
-      
-      const updatedPlots = state.plots.map(plot => {
-        if (plot.state === 'seeded' || plot.state === 'growing') {
-          const willBeWatered = newWeather === 'rainy' || newWeather === 'stormy';
-          
-          if (plot.waterLevel === 0 && !willBeWatered) {
-            return { ...plot, state: 'dead' };
-          }
-          
-          const daysPassed = newDay - (plot.plantedDay || 0);
-          if (daysPassed >= (plot.daysToMature || 0)) {
-            return { ...plot, state: 'mature', waterLevel: 0 };
-          }
-          
-          return { 
-            ...plot, 
-            state: 'growing', 
-            waterLevel: willBeWatered ? 1 : 0 
-          };
-        }
-        return { ...plot, waterLevel: 0 };
-      });
-
-      return {
-        ...state,
-        day: newDay,
-        time: 360,
-        energy: state.maxEnergy,
-        weather: newWeather,
-        plots: updatedPlots,
-        activeActivity: null
-      };
-    }
-
-    case 'UPGRADE_TOOL': {
-      const { toolId, newTier } = action.payload;
-      const newInventory = state.inventory.map(item => {
-        if (item && item.id === toolId) {
-          const lastSpaceIndex = item.name.lastIndexOf(' ');
-          const baseName = item.name.substring(lastSpaceIndex + 1);
-          return {
-            ...item,
-            tier: newTier,
-            name: `${newTier.charAt(0).toUpperCase() + newTier.slice(1)} ${baseName}`
-          };
-        }
-        return item;
-      });
-
-      return {
-        ...state,
-        inventory: newInventory
-      };
-    }
-
     case 'SET_ACTIVE_ACTIVITY':
       return {
         ...state,
@@ -344,12 +449,6 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       return {
         ...state,
         energy: Math.max(0, state.energy - action.payload)
-      };
-
-    case 'ADVANCE_TIME':
-      return {
-        ...state,
-        time: state.time + action.payload
       };
 
     case 'ADD_EXPERIENCE': {

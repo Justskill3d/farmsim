@@ -175,4 +175,5 @@ export type GameAction =
   | { type: 'DISCOVER_RECIPE'; payload: string }
   | { type: 'DISCOVER_ITEM'; payload: string }
   | { type: 'SAVE_GAME' }
-  | { type: 'LOAD_GAME' };
+  | { type: 'LOAD_GAME' }
+  | { type: 'USE_ITEM'; payload: InventoryItem };

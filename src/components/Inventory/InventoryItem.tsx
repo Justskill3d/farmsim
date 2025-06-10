@@ -1,7 +1,8 @@
 import React from 'react';
 import { InventoryItem as InventoryItemType } from '../../types';
-import { X, DollarSign, Trash2 } from 'lucide-react';
+import { X, DollarSign, Trash2, Play, Package } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
+import { getTreasureLoot } from '../../utils/itemUtils';
 
 interface InventoryItemProps {
   item: InventoryItemType;
@@ -80,11 +81,47 @@ const InventoryItemComponent: React.FC<InventoryItemProps> = ({ item, onSelect, 
     }
   };
 
+  const handleUse = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (item.id === 'treasure_chest') {
+      const loot = getTreasureLoot();
+      
+      dispatch({
+        type: 'REMOVE_ITEM',
+        payload: { slotId: item.slotId, quantity: 1 }
+      });
+
+      loot.forEach(item => {
+        dispatch({
+          type: 'ADD_ITEM',
+          payload: { ...item, quantity: 1, slotId: -1 }
+        });
+      });
+
+      dispatch({
+        type: 'SHOW_NOTIFICATION',
+        payload: {
+          title: 'Treasure Found!',
+          message: `Found ${loot.map(i => i.name).join(', ')}!`,
+          type: 'success'
+        }
+      });
+    } else {
+      dispatch({
+        type: 'USE_ITEM',
+        payload: item
+      });
+    }
+  };
+
   const handleClick = () => {
     if (onSelect) {
       onSelect(item);
     }
   };
+
+  const canBeUsed = item.type === 'meal' || item.type === 'consumable' || item.type === 'relic' || item.id === 'treasure_chest';
 
   return (
     <div 
@@ -126,6 +163,15 @@ const InventoryItemComponent: React.FC<InventoryItemProps> = ({ item, onSelect, 
       
       {item.type !== 'tool' && (
         <div className="absolute -top-2 -right-2 flex space-x-1">
+          {canBeUsed && (
+            <button 
+              onClick={handleUse}
+              className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-blue-600 transition-colors shadow-sm"
+              title={item.id === 'treasure_chest' ? 'Open chest' : 'Use item'}
+            >
+              {item.id === 'treasure_chest' ? <Package size={12} /> : <Play size={12} />}
+            </button>
+          )}
           <button 
             onClick={handleSell}
             className="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-green-600 transition-colors shadow-sm"

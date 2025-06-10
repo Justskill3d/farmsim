@@ -21,6 +21,7 @@ const EquipmentPanel: React.FC = () => {
       luck: 0
     };
 
+    // Calculate base stats from equipment
     Object.values(equipment).forEach(item => {
       if (item?.stats) {
         Object.entries(item.stats).forEach(([key, value]) => {
@@ -28,6 +29,32 @@ const EquipmentPanel: React.FC = () => {
         });
       }
     });
+
+    // Calculate set bonuses
+    const copperPieces = Object.values(equipment).filter(item => 
+      item?.name.toLowerCase().includes('copper')
+    ).length;
+
+    const ironPieces = Object.values(equipment).filter(item => 
+      item?.name.toLowerCase().includes('iron')
+    ).length;
+
+    const tungstenPieces = Object.values(equipment).filter(item => 
+      item?.name.toLowerCase().includes('tungsten')
+    ).length;
+
+    // Apply set bonuses
+    if (copperPieces >= 2) {
+      stats.speed = (stats.speed || 0) + 5; // +5% Mining Speed
+    }
+
+    if (ironPieces >= 2) {
+      stats.speed = (stats.speed || 0) + 10; // +10% Mining Speed
+    }
+
+    if (tungstenPieces >= 2) {
+      // +15% Experience Gain is handled in the activity logic
+    }
 
     return stats;
   };
@@ -132,7 +159,7 @@ const EquipmentPanel: React.FC = () => {
                 {Object.values(equipment).filter(item => item?.name.toLowerCase().includes('copper')).length >= 2 ? (
                   <div className="p-2 bg-amber-50 rounded">
                     <div className="font-medium text-amber-700">Copper Set (2+ pieces)</div>
-                    <div>+5% Mining Speed</div>
+                    <div>+5 Mining Speed</div>
                   </div>
                 ) : null}
                 
@@ -140,7 +167,7 @@ const EquipmentPanel: React.FC = () => {
                 {Object.values(equipment).filter(item => item?.name.toLowerCase().includes('iron')).length >= 2 ? (
                   <div className="p-2 bg-gray-50 rounded">
                     <div className="font-medium text-gray-700">Iron Set (2+ pieces)</div>
-                    <div>+10% Mining Speed</div>
+                    <div>+10 Mining Speed</div>
                   </div>
                 ) : null}
                 

@@ -105,13 +105,17 @@ export const minerals: Item[] = [
 // 5. Forageable Items
 export const foraged: Item[] = [
   createItem('wild_horseradish', 'Wild Horseradish', 'Spring forage.', 'foraged', 50),
-  createItem('spring_onion', 'Spring Onion', 'Found in spring.', 'foraged', 40),
+  createItem('spring_onion', 'Spring Onion', 'Found in spring and it is an onion', 'foraged', 40),
   createItem('blackberry', 'Blackberry', 'Fall forage.', 'foraged', 45),
   createItem('mushroom', 'Mushroom', 'Found in all seasons.', 'foraged', 40),
   createItem('truffle', 'Truffle', 'A rare delicacy.', 'foraged', 625, 'rare'),
   createItem('golden_walnut', 'Golden Walnut', 'A mysterious nut.', 'foraged', 1000, 'epic'),
-  createItem('fiber', 'Fiber', 'Used in crafting.', 'foraged', 5),
+  createItem('fiber', 'Fiber', 'Used in crafting. Maybe.', 'foraged', 5),
   createItem('hide', 'Hide', 'Animal hide for crafting.', 'foraged', 15),
+  createItem('herbs', 'Fresh Herbs', 'Aromatic herbs for cooking.', 'foraged', 25, 'common'),
+  createItem('wild_garlic', 'Wild Garlic', 'Adds flavor to dishes.', 'foraged', 35, 'common'),
+  createItem('bay_leaf', 'Bay Leaf', 'A fragrant leaf for seasoning.', 'foraged', 30, 'common'),
+  createItem('water', 'Fresh Water', 'Clean water for cooking and crafting.', 'foraged', 5, 'common', true, 99),
 ];
 
 // 6. Resources
@@ -123,16 +127,78 @@ export const resources: Item[] = [
   createItem('fiber', 'Fiber', 'Used in crafting.', 'resource', 5),
 ];
 
-// 7. Meals
-export const meals: Item[] = [
-  createItem('fried_egg', 'Fried Egg', 'A basic breakfast.', 'meal', 35),
-  createItem('hashbrowns', 'Hashbrowns', 'Crispy potato goodness.', 'meal', 50),
-  createItem('complete_breakfast', 'Complete Breakfast', 'The perfect start.', 'meal', 350, 'rare'),
-  createItem('lucky_lunch', 'Lucky Lunch', 'Brings good fortune.', 'meal', 250, 'uncommon'),
-  createItem('seafood_gumbo', 'Seafood Gumbo', 'A spicy favorite.', 'meal', 400, 'rare'),
+// 7. Cooking Ingredients
+export const cookingIngredients: Item[] = [
+  createItem('flour', 'Flour', 'Basic baking ingredient.', 'component', 15, 'common'),
+  createItem('butter', 'Butter', 'Made from fresh cream.', 'component', 25, 'common'),
+  createItem('oil', 'Cooking Oil', 'For frying and sautéing.', 'component', 20, 'common'),
+  createItem('sugar', 'Sugar', 'Sweetens any dish.', 'component', 15, 'common'),
+  createItem('rice', 'Rice', 'A versatile grain.', 'component', 20, 'common'),
+  createItem('dough', 'Dough', 'Made from flour and water.', 'component', 30, 'common'),
+  createItem('broth', 'Vegetable Broth', 'Base for soups and sauces.', 'component', 40, 'common'),
 ];
 
-// 8. Treasures
+// 8. Meals
+export const meals: Item[] = [
+  createItem('fried_egg', 'Fried Egg', 'A basic breakfast.', 'meal', 35, 'common', true, 99, undefined, undefined, {
+    energy: 15,
+    experience: 10
+  }),
+  createItem('hashbrowns', 'Hashbrowns', 'Crispy potato goodness.', 'meal', 50, 'common', true, 99, undefined, undefined, {
+    energy: 20,
+    experience: 15
+  }),
+  createItem('fish_stew', 'Fish Stew', 'A hearty seafood dish.', 'meal', 180, 'uncommon', true, 99, undefined, undefined, {
+    energy: 45,
+    experience: 25,
+    skillBonus: {
+      skill: 'fishing',
+      amount: 15
+    }
+  }),
+  createItem('mushroom_soup', 'Mushroom Soup', 'A warming forest soup.', 'meal', 120, 'common', true, 99, undefined, undefined, {
+    energy: 30,
+    experience: 20,
+    skillBonus: {
+      skill: 'foraging',
+      amount: 10
+    }
+  }),
+  createItem('vegetable_medley', 'Vegetable Medley', 'A healthy mix of vegetables.', 'meal', 150, 'common', true, 99, undefined, undefined, {
+    energy: 35,
+    experience: 20,
+    skillBonus: {
+      skill: 'farming',
+      amount: 12
+    }
+  }),
+  createItem('complete_breakfast', 'Complete Breakfast', 'The perfect start.', 'meal', 350, 'rare', true, 99, undefined, undefined, {
+    energy: 75,
+    experience: 40,
+    energyCostModifier: {
+      activity: 'farming',
+      amount: -0.2
+    }
+  }),
+  createItem('lucky_lunch', 'Lucky Lunch', 'Brings good fortune.', 'meal', 250, 'uncommon', true, 99, undefined, undefined, {
+    energy: 50,
+    experience: 30,
+    skillBonus: {
+      skill: 'fishing',
+      amount: 20
+    }
+  }),
+  createItem('seafood_gumbo', 'Seafood Gumbo', 'A spicy favorite.', 'meal', 400, 'rare', true, 99, undefined, undefined, {
+    energy: 80,
+    experience: 45,
+    skillBonus: {
+      skill: 'cooking',
+      amount: 25
+    }
+  }),
+];
+
+// 9. Treasures
 export const treasures: Item[] = [
   createItem('ancient_doll', 'Ancient Doll', 'A mysterious artifact.', 'treasure', 300, 'rare'),
   createItem('dinosaur_egg', 'Dinosaur Egg', 'A prehistoric find.', 'treasure', 500, 'epic'),
@@ -141,7 +207,7 @@ export const treasures: Item[] = [
   createItem('treasure_chest', 'Treasure Chest', 'Contains valuable items.', 'treasure', 5000, 'legendary'),
 ];
 
-// 9. Equipment
+// 10. Equipment
 export const equipment: Item[] = [
   // Wood Set
   createItem('wooden_helmet', 'Wooden Helmet', 'A helmet carved from sturdy wood.', 'equipment', 40, 'common', false, 1, undefined, 'equipment', undefined, 'head', {
@@ -165,11 +231,33 @@ export const equipment: Item[] = [
   createItem('plank', 'Wooden Plank', 'A basic crafting material.', 'component', 5, 'common'),
   createItem('leather', 'Leather', 'Tanned hide for crafting.', 'component', 25, 'common'),
   
-  // Other existing equipment...
+  // Iron Set
   createItem('iron_helmet', 'Iron Helmet', 'Sturdy head protection.', 'equipment', 150, 'uncommon', false, 1, undefined, 'equipment', undefined, 'head'),
   createItem('iron_chestplate', 'Iron Chestplate', 'Durable torso protection.', 'equipment', 200, 'uncommon', false, 1, undefined, 'equipment', undefined, 'torso'),
   createItem('iron_leggings', 'Iron Leggings', 'Reliable leg protection.', 'equipment', 175, 'uncommon', false, 1, undefined, 'equipment', undefined, 'legs'),
   createItem('iron_boots', 'Iron Boots', 'Strong foot protection.', 'equipment', 125, 'uncommon', false, 1, undefined, 'equipment', undefined, 'boots'),
+
+  // Tungsten Set
+  createItem('tungsten_helmet', 'Tungsten Helmet', 'An exceptional tungsten helmet.', 'equipment', 800, 'epic', false, 1, undefined, 'equipment', undefined, 'head', {
+    mining: 8,
+    energy: 7,
+    luck: 2
+  }),
+  createItem('tungsten_chestplate', 'Tungsten Chestplate', 'A masterwork tungsten chestplate.', 'equipment', 1200, 'epic', false, 1, undefined, 'equipment', undefined, 'torso', {
+    mining: 10,
+    energy: 8,
+    luck: 3
+  }),
+  createItem('tungsten_leggings', 'Tungsten Leggings', 'Superior tungsten leg protection.', 'equipment', 1000, 'epic', false, 1, undefined, 'equipment', undefined, 'legs', {
+    mining: 8,
+    speed: 7,
+    luck: 2
+  }),
+  createItem('tungsten_boots', 'Tungsten Boots', 'Exceptional tungsten boots.', 'equipment', 700, 'epic', false, 1, undefined, 'equipment', undefined, 'boots', {
+    mining: 7,
+    speed: 8,
+    luck: 2
+  })
 ];
 
 export const trash: Item[] = [
@@ -188,6 +276,7 @@ export const allItems: Item[] = [
   ...minerals,
   ...foraged,
   ...resources,
+  ...cookingIngredients,
   ...meals,
   ...treasures,
   ...equipment,
