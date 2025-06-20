@@ -54,6 +54,75 @@ const components: CraftingRecipe[] = [
       stackable: true,
       maxStackSize: 99
     }
+  },
+  // Metal Bar Recipes
+  {
+    id: 'copper_bar',
+    name: 'Copper Bar',
+    description: 'Smelt copper ore with coal to create refined copper.',
+    category: 'component',
+    ingredients: ['copper_ore', 'coal'],
+    result: getItemById('copper_bar') || {
+      id: 'copper_bar',
+      name: 'Copper Bar',
+      description: 'Refined copper ready for crafting.',
+      type: 'component',
+      value: 50,
+      rarity: 'common',
+      stackable: true,
+      maxStackSize: 99
+    }
+  },
+  {
+    id: 'iron_bar',
+    name: 'Iron Bar',
+    description: 'Smelt iron ore with coal to create refined iron.',
+    category: 'component',
+    ingredients: ['iron_ore', 'coal'],
+    result: getItemById('iron_bar') || {
+      id: 'iron_bar',
+      name: 'Iron Bar',
+      description: 'Refined iron ready for crafting.',
+      type: 'component',
+      value: 100,
+      rarity: 'uncommon',
+      stackable: true,
+      maxStackSize: 99
+    }
+  },
+  {
+    id: 'gold_bar',
+    name: 'Gold Bar',
+    description: 'Smelt gold ore with coal to create refined gold.',
+    category: 'component',
+    ingredients: ['gold_ore', 'coal'],
+    result: getItemById('gold_bar') || {
+      id: 'gold_bar',
+      name: 'Gold Bar',
+      description: 'Refined gold ready for crafting.',
+      type: 'component',
+      value: 400,
+      rarity: 'rare',
+      stackable: true,
+      maxStackSize: 99
+    }
+  },
+  {
+    id: 'tungsten_bar',
+    name: 'Tungsten Bar',
+    description: 'Smelt tungsten ore with coal to create refined tungsten.',
+    category: 'component',
+    ingredients: ['tungsten_ore', 'coal'],
+    result: getItemById('tungsten_bar') || {
+      id: 'tungsten_bar',
+      name: 'Tungsten Bar',
+      description: 'Refined tungsten ready for crafting.',
+      type: 'component',
+      value: 800,
+      rarity: 'epic',
+      stackable: true,
+      maxStackSize: 99
+    }
   }
 ];
 
