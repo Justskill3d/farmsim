@@ -5,6 +5,9 @@ import Dashboard from './components/Dashboard/Dashboard';
 import Roadmap from './components/Roadmap/Roadmap';
 import Notification from './components/UI/Notification';
 import PerkSelection from './components/PerkSelection/PerkSelection';
+import EventModal from './components/Events/EventModal';
+import EncounterModal from './components/Events/EncounterModal';
+import MysteryPackageModal from './components/Events/MysteryPackageModal';
 
 function App() {
   return (
@@ -16,6 +19,9 @@ function App() {
         </Routes>
         <Notification />
         <PerkSelection />
+        <EventModal />
+        <EncounterModal />
+        <MysteryPackageModal />
       </GameProvider>
     </Router>
   );

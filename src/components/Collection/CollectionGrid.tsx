@@ -4,6 +4,7 @@ import Card from '../UI/Card';
 import { allItems } from '../../data/items';
 import { Book, Search, Filter } from 'lucide-react';
 import { ItemType, ItemRarity } from '../../types';
+import { ItemIcon } from '../../utils/itemIcons';
 
 const CollectionGrid: React.FC = () => {
   const { state } = useGame();
@@ -105,7 +106,11 @@ const CollectionGrid: React.FC = () => {
                   <div>
                     <div className="flex items-center mb-2">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl font-bold ${rarityColors[item.rarity]}`}>
-                        {item.name.charAt(0)}
+                        <ItemIcon
+                          itemId={item.id}
+                          itemName={item.name}
+                          size={22}
+                        />
                       </div>
                       <div className="ml-2 flex-1 min-w-0">
                         <div className="text-sm font-medium truncate">{item.name}</div>

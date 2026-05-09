@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Github, Twitter } from 'lucide-react';
+import { MapPin, Code as Code2, AtSign } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -24,7 +24,7 @@ const Footer: React.FC = () => {
               rel="noopener noreferrer"
               className="flex items-center text-amber-700 hover:text-amber-800 transition-colors"
             >
-              <Github size={16} className="mr-1" />
+              <Code2 size={16} className="mr-1" />
               <span>GitHub</span>
             </a>
             <a
@@ -33,7 +33,7 @@ const Footer: React.FC = () => {
               rel="noopener noreferrer"
               className="flex items-center text-amber-700 hover:text-amber-800 transition-colors"
             >
-              <Twitter size={16} className="mr-1" />
+              <AtSign size={16} className="mr-1" />
               <span>Twitter</span>
             </a>
           </div>

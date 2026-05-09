@@ -3,6 +3,7 @@ import { InventoryItem as InventoryItemType } from '../../types';
 import { X, DollarSign, Trash2, Play, Package } from 'lucide-react';
 import { useGame } from '../../context/GameContext';
 import { getTreasureLoot } from '../../utils/itemUtils';
+import { ItemIcon } from '../../utils/itemIcons';
 
 interface InventoryItemProps {
   item: InventoryItemType;
@@ -134,7 +135,12 @@ const InventoryItemComponent: React.FC<InventoryItemProps> = ({ item, onSelect, 
     >
       <div className="flex items-center">
         <div className={`w-10 h-10 ${rarityColors[item.rarity]} rounded-lg flex items-center justify-center overflow-hidden text-xl font-bold ${rarityTextColors[item.rarity]}`}>
-          {item.name.charAt(0)}
+          <ItemIcon
+            itemId={item.id}
+            itemName={item.name}
+            size={22}
+            className={rarityTextColors[item.rarity]}
+          />
         </div>
         <div className="ml-2 flex-1 min-w-0">
           <div className="text-sm font-medium truncate">

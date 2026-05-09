@@ -4,7 +4,7 @@ import { useGame } from '../../context/GameContext';
 import { useItemFinder } from '../../hooks/useItemFinder';
 import Card from '../UI/Card';
 import * as LucideIcons from 'lucide-react';
-import { Item } from '../../types';
+import { Item, EquipmentStats } from '../../types';
 
 // Move perkNames outside component to avoid recreation on each render
 const perkNames: Record<string, string> = {
@@ -39,43 +39,62 @@ interface ActivityCardProps {
   onItemsFound: (items: Item[]) => void;
 }
 
+const getEquipmentStats = (equipment: Record<string, { stats?: EquipmentStats } | null>): EquipmentStats => {
+  const totals: EquipmentStats = { farming: 0, fishing: 0, mining: 0, foraging: 0, cooking: 0, energy: 0, speed: 0, luck: 0 };
+  Object.values(equipment).forEach(item => {
+    if (item?.stats) {
+      Object.entries(item.stats).forEach(([key, value]) => {
+        totals[key as keyof EquipmentStats] = (totals[key as keyof EquipmentStats] || 0) + (value || 0);
+      });
+    }
+  });
+  return totals;
+};
+
 const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onItemsFound }) => {
   const { state, dispatch } = useGame();
   const { energy, activeActivity, skills, weather } = state;
   const { findItems } = useItemFinder();
-  
+
   const isActive = activeActivity === activity.id;
   const skill = skills[activity.id];
-  
+  const eqStats = getEquipmentStats(state.equipment);
+
   const energyReductionPerk = skill.perks.includes(`${activity.id}_energy`);
-  let energyCost = energyReductionPerk 
+  let energyCost = energyReductionPerk
     ? Math.floor(activity.energyCost * 0.8)
     : activity.energyCost;
 
-  // Check for tool mastery perks
   const requiredTool = activity.requiredTool;
   const tool = requiredTool ? state.inventory.find(item => item && item.id === requiredTool) : null;
-  
-  // Apply energy cost reductions for master perks
+
   if (tool?.tier === 'tungsten') {
     if (activity.id === 'farming' && skill.perks.includes('hoe_master')) {
       energyCost = 0;
     }
   }
 
-  // Calculate time cost with tool speed bonus
+  // Equipment energy stat reduces energy cost (1 point = 1% reduction)
+  if (eqStats.energy && eqStats.energy > 0) {
+    energyCost = Math.max(0, Math.floor(energyCost * (1 - eqStats.energy * 0.01)));
+  }
+
   let timeCost = activity.timeCost;
   if (tool?.tier) {
     const speedBonuses = {
       basic: 1,
-      copper: 0.85, // 15% faster
-      iron: 0.75,   // 25% faster
-      tungsten: 0.6 // 40% faster
+      copper: 0.85,
+      iron: 0.75,
+      tungsten: 0.6
     };
     timeCost = Math.max(1, Math.floor(timeCost * speedBonuses[tool.tier]));
   }
 
-  // Apply weather-based energy reduction
+  // Equipment speed stat reduces time cost (1 point = 1% reduction)
+  if (eqStats.speed && eqStats.speed > 0) {
+    timeCost = Math.max(1, Math.floor(timeCost * (1 - eqStats.speed * 0.01)));
+  }
+
   const weatherBonuses = {
     sunny: ['farming', 'foraging'],
     rainy: ['fishing'],
@@ -83,7 +102,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onItemsFound }) =
   };
 
   if (weatherBonuses[weather]?.includes(activity.id)) {
-    energyCost = Math.max(1, energyCost - 1);
+    energyCost = Math.max(energyCost === 0 ? 0 : 1, energyCost - 1);
   }
   
   const hasEnoughEnergy = energy >= energyCost;
@@ -149,14 +168,38 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, onItemsFound }) =
         }
       }
 
+      const keptItems: Item[] = [];
+      let trashGold = 0;
+
       result.items.forEach(item => {
-        dispatch({
-          type: 'ADD_ITEM',
-          payload: { ...item, slotId: -1 }
-        });
+        if (item.type === 'trash') {
+          trashGold += Math.max(1, item.value) * (item.quantity || 1);
+          dispatch({ type: 'DISCOVER_ITEM', payload: item.id });
+        } else {
+          dispatch({
+            type: 'ADD_ITEM',
+            payload: { ...item, slotId: -1 }
+          });
+          keptItems.push(item);
+        }
       });
-      
-      onItemsFound(result.items);
+
+      if (trashGold > 0) {
+        dispatch({
+          type: 'SELL_ITEM',
+          payload: { value: trashGold }
+        });
+        dispatch({
+          type: 'SHOW_NOTIFICATION',
+          payload: {
+            title: 'Trash Auto-Sold',
+            message: `Sold junk for ${trashGold}g`,
+            type: 'info'
+          }
+        });
+      }
+
+      onItemsFound(keptItems.length > 0 ? keptItems : result.items);
       
       setTimeout(() => {
         dispatch({

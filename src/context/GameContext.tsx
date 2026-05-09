@@ -1,7 +1,14 @@
 import React, { createContext, useContext, useReducer } from 'react';
-import { tools } from '../data/items';
+import { tools, getItemById } from '../data/items';
 import { getRandomPerks } from '../data/perks';
 import { getTreasureLoot, applyItemEffects } from '../utils/itemUtils';
+import { craftingRecipes } from '../data/crafting';
+import {
+  pickRandomDailyEvent,
+  pickRandomEncounter,
+  rollMysteryPackageOptions,
+} from '../data/events';
+import { logEvent, logMysteryPackage } from '../lib/supabase';
 
 interface GameState {
   day: number;
@@ -68,7 +75,11 @@ const initialState: GameState = {
     amulet: null
   },
   discoveredRecipes: [],
-  discoveredItems: []
+  discoveredItems: [],
+  dailyEvent: null,
+  pendingEncounter: null,
+  mysteryPackage: null,
+  lastMysteryWeek: 0
 };
 
 const calculateLevel = (experience: number): number => {
@@ -111,31 +122,98 @@ const endDay = (state: GameState): GameState => {
   const weatherOptions = getSeasonalWeather(newSeason);
   const newWeather = weatherOptions[Math.floor(Math.random() * weatherOptions.length)];
   
+  const blightChance = state.dailyEvent?.effects?.cropDeathChance ?? 0;
+
   const updatedPlots = state.plots.map(plot => {
     if (newSeason === 'winter' && (plot.state === 'seeded' || plot.state === 'growing')) {
       return { ...plot, state: 'dead' };
     }
-    
+
     if (plot.state === 'seeded' || plot.state === 'growing') {
       const willBeWatered = newWeather === 'rainy' || newWeather === 'stormy';
-      
+
       if (plot.waterLevel === 0 && !willBeWatered) {
         return { ...plot, state: 'dead' };
       }
-      
+
+      if (plot.waterLevel === 0 && blightChance > 0 && Math.random() < blightChance) {
+        return { ...plot, state: 'dead' };
+      }
+
       const daysPassed = newDay - (plot.plantedDay || 0);
       if (daysPassed >= (plot.daysToMature || 0)) {
         return { ...plot, state: 'mature', waterLevel: 0 };
       }
-      
-      return { 
-        ...plot, 
-        state: 'growing', 
-        waterLevel: willBeWatered ? 1 : 0 
+
+      return {
+        ...plot,
+        state: 'growing',
+        waterLevel: willBeWatered ? 1 : 0
       };
     }
     return { ...plot, waterLevel: 0 };
   });
+
+  // Roll a new daily event
+  const rolledEvent = pickRandomDailyEvent();
+  const dailyEvent = rolledEvent
+    ? {
+        id: rolledEvent.id,
+        title: rolledEvent.title,
+        description: rolledEvent.description,
+        flavor: rolledEvent.flavor,
+        iconName: rolledEvent.iconName,
+        accent: rolledEvent.accent,
+        effects: {
+          activityMultipliers: rolledEvent.effects.activityMultipliers,
+          rareChanceBonus: rolledEvent.effects.rareChanceBonus,
+          sellMultiplier: rolledEvent.effects.sellMultiplier,
+          cropDeathChance: rolledEvent.effects.cropDeathChance,
+        },
+      }
+    : null;
+
+  if (dailyEvent) {
+    logEvent({ day: newDay, eventId: dailyEvent.id, eventType: 'daily' });
+  }
+
+  // ~15% chance to trigger an encounter
+  let pendingEncounter = null;
+  if (Math.random() < 0.15) {
+    const enc = pickRandomEncounter();
+    pendingEncounter = {
+      id: enc.id,
+      title: enc.title,
+      description: enc.description,
+      flavor: enc.flavor,
+      iconName: enc.iconName,
+      accent: enc.accent,
+      options: enc.options.map(o => ({
+        id: o.id,
+        label: o.label,
+        description: o.description,
+        effects: {
+          goldDelta: o.effects.goldDelta,
+          itemsGranted: o.effects.itemsGranted,
+          energyBonus: o.effects.energyBonus,
+        },
+      })),
+    };
+    logEvent({ day: newDay, eventId: enc.id, eventType: 'encounter' });
+  }
+
+  // Weekly mystery package (every 7 days)
+  const currentWeek = Math.floor((newDay - 1) / 7) + 1;
+  let mysteryPackage = state.mysteryPackage ?? null;
+  let lastMysteryWeek = state.lastMysteryWeek ?? 0;
+  if (currentWeek > lastMysteryWeek && newDay % 7 === 1) {
+    const options = rollMysteryPackageOptions();
+    mysteryPackage = { week: currentWeek, options };
+    lastMysteryWeek = currentWeek;
+  }
+
+  // Apply energy bonus from event if present
+  const startingEnergy = state.maxEnergy + (rolledEvent?.effects?.energyBonus ?? 0);
 
   return {
     ...state,
@@ -143,15 +221,17 @@ const endDay = (state: GameState): GameState => {
     season: newSeason,
     year: newYear,
     time: 360,
-    energy: state.maxEnergy,
+    energy: startingEnergy,
     weather: newWeather,
     plots: updatedPlots,
     activeActivity: null,
-    notification: {
-      title: 'Day Ended',
-      message: `Welcome to day ${newDay}!`,
-      type: 'info'
-    }
+    dailyEvent,
+    pendingEncounter,
+    mysteryPackage,
+    lastMysteryWeek,
+    notification: dailyEvent
+      ? { title: dailyEvent.title, message: dailyEvent.flavor, type: 'info' }
+      : { title: 'Day Ended', message: `Welcome to day ${newDay}!`, type: 'info' },
   };
 };
 
@@ -352,13 +432,54 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
 
     case 'USE_ITEM': {
       const item = action.payload;
-      
+
+      // Handle recipe notes
+      if (item.recipeId) {
+        const alreadyKnown = state.discoveredRecipes.includes(item.recipeId);
+        if (alreadyKnown) {
+          return {
+            ...state,
+            notification: {
+              title: 'Already Known',
+              message: 'You already know this recipe.',
+              type: 'info'
+            }
+          };
+        }
+
+        const recipe = craftingRecipes.find(r => r.id === item.recipeId);
+        const newInventory = [...state.inventory];
+        const itemIndex = newInventory.findIndex(i => i?.slotId === item.slotId);
+        if (itemIndex === -1) return state;
+
+        if (item.quantity > 1) {
+          newInventory[itemIndex] = { ...item, quantity: item.quantity - 1 };
+        } else {
+          newInventory[itemIndex] = null;
+        }
+
+        const ingredientNames = recipe
+          ? `${recipe.ingredients[0].replace(/_/g, ' ')} + ${recipe.ingredients[1].replace(/_/g, ' ')}`
+          : '';
+
+        return {
+          ...state,
+          inventory: newInventory,
+          discoveredRecipes: [...state.discoveredRecipes, item.recipeId],
+          notification: {
+            title: 'Recipe Discovered!',
+            message: recipe ? `${recipe.name}: ${ingredientNames}` : 'A new recipe has been learned.',
+            type: 'success'
+          }
+        };
+      }
+
       // Remove the item from inventory
       const newInventory = [...state.inventory];
       const itemIndex = newInventory.findIndex(i => i?.slotId === item.slotId);
-      
+
       if (itemIndex === -1) return state;
-      
+
       if (item.quantity > 1) {
         newInventory[itemIndex] = {
           ...item,
@@ -367,10 +488,10 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       } else {
         newInventory[itemIndex] = null;
       }
-      
+
       // Apply item effects
       let newState = applyItemEffects({ ...state, inventory: newInventory }, item);
-      
+
       // Show notification
       let message = '';
       if (item.effects?.energy) {
@@ -380,12 +501,58 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       } else if (item.effects?.skillBonus) {
         message = `Gained ${item.effects.skillBonus.amount} ${item.effects.skillBonus.skill} experience`;
       }
-      
+
       return {
         ...newState,
         notification: {
           title: 'Item Used',
           message,
+          type: 'success'
+        }
+      };
+    }
+
+    case 'EXPAND_INVENTORY': {
+      const BASE_SIZE = 16;
+      const MAX_SIZE = 40;
+      const SLOTS_PER_EXPANSION = 4;
+
+      if (state.inventorySize >= MAX_SIZE) {
+        return {
+          ...state,
+          notification: {
+            title: 'Maximum Capacity',
+            message: 'Your inventory is already at maximum size.',
+            type: 'error'
+          }
+        };
+      }
+
+      const expansionsPurchased = (state.inventorySize - BASE_SIZE) / SLOTS_PER_EXPANSION;
+      const cost = 5000 + expansionsPurchased * 10000;
+
+      if (state.money < cost) {
+        return {
+          ...state,
+          notification: {
+            title: 'Not Enough Gold',
+            message: `You need ${cost.toLocaleString()}g to expand your inventory.`,
+            type: 'error'
+          }
+        };
+      }
+
+      const newSize = state.inventorySize + SLOTS_PER_EXPANSION;
+      const newInventory = [...state.inventory, ...Array(SLOTS_PER_EXPANSION).fill(null)];
+
+      return {
+        ...state,
+        money: state.money - cost,
+        inventorySize: newSize,
+        inventory: newInventory,
+        notification: {
+          title: 'Inventory Expanded',
+          message: `Added ${SLOTS_PER_EXPANSION} new slots. You now have ${newSize} total.`,
           type: 'success'
         }
       };
@@ -563,12 +730,131 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       };
     }
 
-    case 'SELL_ITEM':
+    case 'SELL_ITEM': {
       const { value = 0 } = action.payload;
+      const multiplier = state.dailyEvent?.effects?.sellMultiplier ?? 1;
       return {
         ...state,
-        money: state.money + value
+        money: state.money + Math.round(value * multiplier)
       };
+    }
+
+    case 'ADD_GOLD':
+      return { ...state, money: Math.max(0, state.money + action.payload) };
+
+    case 'SET_DAILY_EVENT':
+      return { ...state, dailyEvent: action.payload };
+
+    case 'DISMISS_DAILY_EVENT':
+      return { ...state, dailyEvent: state.dailyEvent ? { ...state.dailyEvent } : null };
+
+    case 'SET_ENCOUNTER':
+      return { ...state, pendingEncounter: action.payload };
+
+    case 'RESOLVE_ENCOUNTER': {
+      if (!state.pendingEncounter) return state;
+      const choice = state.pendingEncounter.options.find(o => o.id === action.payload.optionId);
+      if (!choice) return state;
+
+      let next = { ...state, pendingEncounter: null };
+
+      if (choice.effects.goldDelta) {
+        next = { ...next, money: Math.max(0, next.money + choice.effects.goldDelta) };
+      }
+      if (choice.effects.energyBonus) {
+        next = { ...next, energy: Math.min(next.maxEnergy, next.energy + choice.effects.energyBonus) };
+      }
+      if (choice.effects.itemsGranted) {
+        const newInventory = [...next.inventory];
+        for (const grant of choice.effects.itemsGranted) {
+          const baseItem = getItemById(grant.id);
+          if (!baseItem) continue;
+          let remaining = grant.quantity;
+          if (baseItem.stackable) {
+            for (let i = 0; i < newInventory.length && remaining > 0; i++) {
+              const slot = newInventory[i];
+              if (slot && slot.id === grant.id && slot.quantity < baseItem.maxStackSize) {
+                const add = Math.min(baseItem.maxStackSize - slot.quantity, remaining);
+                newInventory[i] = { ...slot, quantity: slot.quantity + add };
+                remaining -= add;
+              }
+            }
+          }
+          while (remaining > 0) {
+            const empty = newInventory.findIndex(s => s === null);
+            if (empty === -1) break;
+            const q = Math.min(remaining, baseItem.maxStackSize);
+            newInventory[empty] = { ...baseItem, quantity: q, slotId: empty };
+            remaining -= q;
+          }
+        }
+        next = { ...next, inventory: newInventory };
+      }
+
+      logEvent({
+        day: next.day,
+        eventId: state.pendingEncounter.id,
+        eventType: 'encounter',
+        choiceId: action.payload.optionId,
+      });
+
+      return {
+        ...next,
+        notification: { title: 'Choice Made', message: choice.label, type: 'success' },
+      };
+    }
+
+    case 'SET_MYSTERY_PACKAGE':
+      return { ...state, mysteryPackage: action.payload };
+
+    case 'CLAIM_MYSTERY_PACKAGE': {
+      if (!state.mysteryPackage) return state;
+      const opt = state.mysteryPackage.options.find(o => o.id === action.payload.optionId);
+      if (!opt) return state;
+
+      let next = { ...state };
+      if (opt.reward.goldDelta) {
+        next = { ...next, money: next.money + opt.reward.goldDelta };
+      }
+      if (opt.reward.itemsGranted) {
+        const newInventory = [...next.inventory];
+        for (const grant of opt.reward.itemsGranted) {
+          const baseItem = getItemById(grant.id);
+          if (!baseItem) continue;
+          let remaining = grant.quantity;
+          if (baseItem.stackable) {
+            for (let i = 0; i < newInventory.length && remaining > 0; i++) {
+              const slot = newInventory[i];
+              if (slot && slot.id === grant.id && slot.quantity < baseItem.maxStackSize) {
+                const add = Math.min(baseItem.maxStackSize - slot.quantity, remaining);
+                newInventory[i] = { ...slot, quantity: slot.quantity + add };
+                remaining -= add;
+              }
+            }
+          }
+          while (remaining > 0) {
+            const empty = newInventory.findIndex(s => s === null);
+            if (empty === -1) break;
+            const q = Math.min(remaining, baseItem.maxStackSize);
+            newInventory[empty] = { ...baseItem, quantity: q, slotId: empty };
+            remaining -= q;
+          }
+        }
+        next = { ...next, inventory: newInventory };
+      }
+
+      logMysteryPackage({
+        week: state.mysteryPackage.week,
+        options: state.mysteryPackage.options,
+        chosenOptionId: action.payload.optionId,
+      });
+
+      return {
+        ...next,
+        mysteryPackage: null,
+        notification: { title: 'Package Claimed', message: opt.label, type: 'success' },
+      };
+    }
 
     case 'SHOW_NOTIFICATION':
       return {

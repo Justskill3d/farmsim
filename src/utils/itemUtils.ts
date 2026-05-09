@@ -9,7 +9,15 @@ const treasurePool: { id: string; weight: number; rarity: ItemRarity }[] = [
   { id: 'prismatic_shard', weight: 5, rarity: 'legendary' },
   { id: 'ancient_doll', weight: 30, rarity: 'rare' },
   { id: 'golden_pumpkin', weight: 15, rarity: 'epic' },
-  { id: 'pearl', weight: 35, rarity: 'rare' }
+  { id: 'pearl', weight: 35, rarity: 'rare' },
+  { id: 'prismatic_ring', weight: 2, rarity: 'legendary' },
+  { id: 'amulet_of_fortune', weight: 5, rarity: 'epic' },
+  { id: 'golden_ring', weight: 10, rarity: 'rare' },
+  { id: 'champions_belt', weight: 8, rarity: 'rare' },
+  { id: 'note_prismatic_ring', weight: 8, rarity: 'epic' },
+  { id: 'note_amulet_of_fortune', weight: 10, rarity: 'epic' },
+  { id: 'note_tungsten_gauntlets', weight: 10, rarity: 'epic' },
+  { id: 'note_amulet_of_plenty', weight: 15, rarity: 'rare' }
 ];
 
 export const getTreasureLoot = (count: number = 3): Item[] => {

@@ -56,6 +56,7 @@ export interface Item {
   equipmentSlot?: EquipmentSlot;
   stats?: EquipmentStats;
   craftingCategory?: CraftingCategory;
+  recipeId?: string;
   effects?: {
     energy?: number;
     experience?: number;
@@ -118,6 +119,52 @@ export interface Perk {
   effect: (state: GameState) => GameState;
 }
 
+export interface ActiveDailyEvent {
+  id: string;
+  title: string;
+  description: string;
+  flavor: string;
+  iconName: string;
+  accent: string;
+  effects: {
+    activityMultipliers?: Partial<Record<Activity, number>>;
+    rareChanceBonus?: Partial<Record<Activity, number>>;
+    sellMultiplier?: number;
+    cropDeathChance?: number;
+  };
+}
+
+export interface MysteryPackageOption {
+  id: string;
+  label: string;
+  description: string;
+  reward: { goldDelta?: number; itemsGranted?: { id: string; quantity: number }[] };
+}
+
+export interface MysteryPackageState {
+  week: number;
+  options: [MysteryPackageOption, MysteryPackageOption, MysteryPackageOption];
+}
+
+export interface PendingEncounter {
+  id: string;
+  title: string;
+  description: string;
+  flavor: string;
+  iconName: string;
+  accent: string;
+  options: {
+    id: string;
+    label: string;
+    description: string;
+    effects: {
+      goldDelta?: number;
+      itemsGranted?: { id: string; quantity: number }[];
+      energyBonus?: number;
+    };
+  }[];
+}
+
 export interface GameState {
   day: number;
   season: Season;
@@ -138,6 +185,10 @@ export interface GameState {
   equipment: Equipment;
   discoveredRecipes: string[];
   discoveredItems: string[];
+  dailyEvent?: ActiveDailyEvent | null;
+  pendingEncounter?: PendingEncounter | null;
+  mysteryPackage?: MysteryPackageState | null;
+  lastMysteryWeek?: number;
 }
 
 export type GameContextType = {
@@ -176,4 +227,12 @@ export type GameAction =
   | { type: 'DISCOVER_ITEM'; payload: string }
   | { type: 'SAVE_GAME' }
   | { type: 'LOAD_GAME' }
-  | { type: 'USE_ITEM'; payload: InventoryItem };
+  | { type: 'USE_ITEM'; payload: InventoryItem }
+  | { type: 'EXPAND_INVENTORY' }
+  | { type: 'SET_DAILY_EVENT'; payload: ActiveDailyEvent | null }
+  | { type: 'DISMISS_DAILY_EVENT' }
+  | { type: 'SET_ENCOUNTER'; payload: PendingEncounter | null }
+  | { type: 'RESOLVE_ENCOUNTER'; payload: { optionId: string } }
+  | { type: 'SET_MYSTERY_PACKAGE'; payload: MysteryPackageState | null }
+  | { type: 'CLAIM_MYSTERY_PACKAGE'; payload: { optionId: string } }
+  | { type: 'ADD_GOLD'; payload: number };

@@ -3,11 +3,18 @@ import { useGame } from '../../context/GameContext';
 import InventoryItemComponent from './InventoryItem';
 import { InventoryItem } from '../../types';
 import Card from '../UI/Card';
-import { Package, DollarSign } from 'lucide-react';
+import { Package, DollarSign, Plus } from 'lucide-react';
+
+const BASE_INVENTORY_SIZE = 16;
+const MAX_INVENTORY_SIZE = 40;
+const SLOTS_PER_EXPANSION = 4;
 
 const InventoryGrid: React.FC = () => {
   const { state, dispatch } = useGame();
-  const { inventory, inventorySize } = state;
+  const { inventory, inventorySize, equipment } = state;
+  const hasPrismaticRing =
+    equipment.ring_left?.id === 'prismatic_ring' ||
+    equipment.ring_right?.id === 'prismatic_ring';
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
 
   // Create slots array with the correct size
@@ -61,6 +68,16 @@ const InventoryGrid: React.FC = () => {
   const sellableItemsCount = inventory.filter(item => item && item.type !== 'tool').length;
   const isInventoryFull = inventory.filter(Boolean).length >= inventorySize;
 
+  const expansionsPurchased = (inventorySize - BASE_INVENTORY_SIZE) / SLOTS_PER_EXPANSION;
+  const maxExpansions = (MAX_INVENTORY_SIZE - BASE_INVENTORY_SIZE) / SLOTS_PER_EXPANSION;
+  const isAtMaxSize = inventorySize >= MAX_INVENTORY_SIZE;
+  const expansionCost = 5000 + expansionsPurchased * 10000;
+  const canAffordExpansion = state.money >= expansionCost;
+
+  const handleExpandInventory = () => {
+    dispatch({ type: 'EXPAND_INVENTORY' });
+  };
+
   return (
     <div className="mt-4">
       <Card 
@@ -71,7 +88,7 @@ const InventoryGrid: React.FC = () => {
               <span>Inventory</span>
             </div>
             <div className="flex items-center gap-4">
-              {sellableItemsCount > 0 && (
+              {hasPrismaticRing && sellableItemsCount > 0 && (
                 <button
                   onClick={handleSellAll}
                   className="flex items-center px-3 py-1 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
@@ -112,6 +129,42 @@ const InventoryGrid: React.FC = () => {
           ))}
         </div>
         
+        <div className="mt-4 p-3 bg-white rounded-md border border-amber-200">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <div className="flex items-center text-sm font-medium text-gray-800">
+                <Package size={14} className="mr-1.5 text-amber-700" />
+                Backpack Expansion
+              </div>
+              <div className="text-xs text-gray-500 mt-0.5">
+                {isAtMaxSize
+                  ? `Maximum capacity reached (${MAX_INVENTORY_SIZE} slots)`
+                  : `Tier ${expansionsPurchased}/${maxExpansions} \u00B7 +${SLOTS_PER_EXPANSION} slots per purchase`}
+              </div>
+            </div>
+            <button
+              onClick={handleExpandInventory}
+              disabled={isAtMaxSize || !canAffordExpansion}
+              className={`flex items-center px-3 py-1.5 text-sm rounded-md font-medium transition-colors ${
+                isAtMaxSize
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : canAffordExpansion
+                  ? 'bg-amber-600 text-white hover:bg-amber-700'
+                  : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {isAtMaxSize ? (
+                <span>Maxed</span>
+              ) : (
+                <>
+                  <Plus size={14} className="mr-1" />
+                  <span>Expand for {expansionCost.toLocaleString()}g</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
         {selectedItem && (
           <div className="mt-4 p-3 bg-white rounded-md border border-gray-200">
             <h3 className="font-medium">{selectedItem.name}</h3>

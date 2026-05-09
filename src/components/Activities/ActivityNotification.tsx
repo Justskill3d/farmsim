@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { InventoryItem } from '../../types';
 import { X } from 'lucide-react';
+import { ItemIcon } from '../../utils/itemIcons';
 
 interface ActivityNotificationProps {
   items: InventoryItem[];
@@ -47,7 +48,7 @@ const ActivityNotification: React.FC<ActivityNotificationProps> = ({ items, onCl
             }`}
           >
             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center font-bold text-lg">
-              {item.name.charAt(0)}
+              <ItemIcon itemId={item.id} itemName={item.name} size={18} />
             </div>
             <div className="ml-2">
               <div className="font-medium">{item.name}</div>

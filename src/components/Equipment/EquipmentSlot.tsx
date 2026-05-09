@@ -1,7 +1,25 @@
 import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { InventoryItem, EquipmentSlot as EquipmentSlotType } from '../../types';
-import { HardHat, Shirt, Medal, Ruler, Footprints, HandMetal, Torus, Cross, X, Sprout, Fish, Pickaxe, Leaf, Utensils, Battery, Gauge, Sparkles } from 'lucide-react';
+import { HardHat, Shirt, Medal, Footprints, HandGrab as Grab, Torus, Gem, X, Sprout, Fish, Pickaxe, Leaf, Utensils, Battery, Gauge, Sparkles } from 'lucide-react';
+
+const TrousersIcon: React.FC<{ size?: number }> = ({ size = 24 }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M5 3h14l-1 6-1 12h-4l-1-10-1 10H7L6 9z" />
+    <path d="M5 3h14" />
+    <path d="M12 9v2" />
+  </svg>
+);
 
 interface EquipmentSlotProps {
   type: EquipmentSlotType;
@@ -42,16 +60,16 @@ const EquipmentSlot: React.FC<EquipmentSlotProps> = ({ type, item }) => {
       case 'belt':
         return <Medal size={24} />;
       case 'legs':
-        return <Ruler size={24} />;
+        return <TrousersIcon size={24} />;
       case 'boots':
         return <Footprints size={24} />;
       case 'hands':
-        return <HandMetal size={24} />;
+        return <Grab size={24} />;
       case 'ring_left':
       case 'ring_right':
         return <Torus size={24} />;
       case 'amulet':
-        return <Cross size={24} />;
+        return <Gem size={24} />;
       default:
         return <HardHat size={24} />;
     }
@@ -64,11 +82,13 @@ const EquipmentSlot: React.FC<EquipmentSlotProps> = ({ type, item }) => {
   };
 
   const getEquippableItems = () => {
-    return state.inventory.filter((invItem): invItem is InventoryItem => 
-      invItem !== null && 
-      invItem.type === 'equipment' && 
-      invItem.equipmentSlot === type
-    );
+    return state.inventory.filter((invItem): invItem is InventoryItem => {
+      if (!invItem || invItem.type !== 'equipment') return false;
+      if (invItem.equipmentSlot === type) return true;
+      if ((type === 'ring_left' || type === 'ring_right') &&
+          (invItem.equipmentSlot === 'ring_left' || invItem.equipmentSlot === 'ring_right')) return true;
+      return false;
+    });
   };
 
   const getRarityStyle = (rarity: string) => {

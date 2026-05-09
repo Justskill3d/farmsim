@@ -31,33 +31,37 @@ const EquipmentPanel: React.FC = () => {
     });
 
     // Calculate set bonuses
-    const copperPieces = Object.values(equipment).filter(item => 
-      item?.name.toLowerCase().includes('copper')
+    const pieceCount = (needle: string) =>
+      Object.values(equipment).filter(item => item?.id.startsWith(needle)).length;
+
+    const ironPieces = pieceCount('iron_');
+    const tungstenPieces = pieceCount('tungsten_');
+    const verdantPieces = pieceCount('verdant_');
+    const tidecallerPieces = pieceCount('tidecaller_');
+    const gourmetPieces = Object.values(equipment).filter(item =>
+      item && (item.id.startsWith('gourmet_') || item.id === 'chefs_hat')
     ).length;
+    const wandererPieces = pieceCount('wanderer_');
 
-    const ironPieces = Object.values(equipment).filter(item => 
-      item?.name.toLowerCase().includes('iron')
-    ).length;
-
-    const tungstenPieces = Object.values(equipment).filter(item => 
-      item?.name.toLowerCase().includes('tungsten')
-    ).length;
-
-    // Apply set bonuses
-    if (copperPieces >= 2) {
-      stats.speed = (stats.speed || 0) + 5; // +5% Mining Speed
-    }
-
-    if (ironPieces >= 2) {
-      stats.speed = (stats.speed || 0) + 10; // +10% Mining Speed
-    }
-
-    if (tungstenPieces >= 2) {
-      // +15% Experience Gain is handled in the activity logic
-    }
+    if (ironPieces >= 2) stats.speed = (stats.speed || 0) + 10;
+    if (tungstenPieces >= 2) stats.mining = (stats.mining || 0) + 5;
+    if (verdantPieces >= 3) stats.farming = (stats.farming || 0) + 8;
+    if (verdantPieces >= 4) stats.luck = (stats.luck || 0) + 4;
+    if (tidecallerPieces >= 3) stats.fishing = (stats.fishing || 0) + 8;
+    if (tidecallerPieces >= 4) stats.luck = (stats.luck || 0) + 4;
+    if (gourmetPieces >= 3) stats.cooking = (stats.cooking || 0) + 8;
+    if (gourmetPieces >= 4) stats.energy = (stats.energy || 0) + 6;
+    if (wandererPieces >= 3) stats.foraging = (stats.foraging || 0) + 8;
+    if (wandererPieces >= 4) stats.speed = (stats.speed || 0) + 6;
 
     return stats;
   };
+
+  const pieceCount = (needle: string) =>
+    Object.values(equipment).filter(item => item?.id.startsWith(needle)).length;
+  const gourmetCount = Object.values(equipment).filter(item =>
+    item && (item.id.startsWith('gourmet_') || item.id === 'chefs_hat')
+  ).length;
 
   const totalStats = calculateTotalStats();
 
@@ -155,29 +159,47 @@ const EquipmentPanel: React.FC = () => {
                 Set Bonuses
               </h3>
               <div className="space-y-2 text-sm text-gray-600">
-                {/* Copper Set */}
-                {Object.values(equipment).filter(item => item?.name.toLowerCase().includes('copper')).length >= 2 ? (
-                  <div className="p-2 bg-amber-50 rounded">
-                    <div className="font-medium text-amber-700">Copper Set (2+ pieces)</div>
-                    <div>+5 Mining Speed</div>
-                  </div>
-                ) : null}
-                
-                {/* Iron Set */}
-                {Object.values(equipment).filter(item => item?.name.toLowerCase().includes('iron')).length >= 2 ? (
+                {pieceCount('iron_') >= 2 && (
                   <div className="p-2 bg-gray-50 rounded">
-                    <div className="font-medium text-gray-700">Iron Set (2+ pieces)</div>
-                    <div>+10 Mining Speed</div>
+                    <div className="font-medium text-gray-700">Iron Set ({pieceCount('iron_')}pc)</div>
+                    <div>+10 Speed</div>
                   </div>
-                ) : null}
-                
-                {/* Tungsten Set */}
-                {Object.values(equipment).filter(item => item?.name.toLowerCase().includes('tungsten')).length >= 2 ? (
+                )}
+                {pieceCount('tungsten_') >= 2 && (
                   <div className="p-2 bg-blue-50 rounded">
-                    <div className="font-medium text-blue-700">Tungsten Set (2+ pieces)</div>
-                    <div>+15% Experience Gain</div>
+                    <div className="font-medium text-blue-700">Tungsten Set ({pieceCount('tungsten_')}pc)</div>
+                    <div>+5 Mining, +15% XP</div>
                   </div>
-                ) : null}
+                )}
+                {pieceCount('verdant_') >= 3 && (
+                  <div className="p-2 bg-emerald-50 rounded">
+                    <div className="font-medium text-emerald-700">Verdant Set ({pieceCount('verdant_')}pc)</div>
+                    <div>+8 Farming{pieceCount('verdant_') >= 4 ? ', +4 Luck' : ''}</div>
+                  </div>
+                )}
+                {pieceCount('tidecaller_') >= 3 && (
+                  <div className="p-2 bg-sky-50 rounded">
+                    <div className="font-medium text-sky-700">Tidecaller Set ({pieceCount('tidecaller_')}pc)</div>
+                    <div>+8 Fishing{pieceCount('tidecaller_') >= 4 ? ', +4 Luck' : ''}</div>
+                  </div>
+                )}
+                {gourmetCount >= 3 && (
+                  <div className="p-2 bg-rose-50 rounded">
+                    <div className="font-medium text-rose-700">Gourmet Set ({gourmetCount}pc)</div>
+                    <div>+8 Cooking{gourmetCount >= 4 ? ', +6 Energy' : ''}</div>
+                  </div>
+                )}
+                {pieceCount('wanderer_') >= 3 && (
+                  <div className="p-2 bg-teal-50 rounded">
+                    <div className="font-medium text-teal-700">Wanderer Set ({pieceCount('wanderer_')}pc)</div>
+                    <div>+8 Foraging{pieceCount('wanderer_') >= 4 ? ', +6 Speed' : ''}</div>
+                  </div>
+                )}
+                {pieceCount('iron_') < 2 && pieceCount('tungsten_') < 2 && pieceCount('verdant_') < 3 && pieceCount('tidecaller_') < 3 && gourmetCount < 3 && pieceCount('wanderer_') < 3 && (
+                  <div className="text-xs text-gray-500 italic">
+                    Equip 3+ pieces of a set to unlock bonuses.
+                  </div>
+                )}
               </div>
             </div>
           </div>

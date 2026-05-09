@@ -5,6 +5,7 @@ import { findRecipe, getRecipesByCategory } from '../../data/crafting';
 import Card from '../UI/Card';
 import { Beaker, Book, Hammer, FlaskRound as Flask, Shield, Scroll } from 'lucide-react';
 import { getItemById } from '../../data/items';
+import { ItemIcon } from '../../utils/itemIcons';
 
 const CraftingInterface: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -284,7 +285,12 @@ const CraftingInterface: React.FC = () => {
                 >
                   <div className="text-center">
                     <div className="w-8 h-8 mx-auto rounded-full bg-amber-100 flex items-center justify-center text-amber-800 font-bold">
-                      {item.name.charAt(0)}
+                      <ItemIcon
+                        itemId={item.id}
+                        itemName={item.name}
+                        size={18}
+                        className="text-amber-800"
+                      />
                     </div>
                     <div className="mt-1 text-sm truncate">{item.name}</div>
                     {item.quantity > 1 && (
@@ -310,7 +316,12 @@ const CraftingInterface: React.FC = () => {
                   {selectedSlots[index] ? (
                     <div className="text-center">
                       <div className="w-12 h-12 mx-auto rounded-full bg-amber-100 flex items-center justify-center text-amber-800 font-bold text-xl">
-                        {selectedSlots[index]!.name.charAt(0)}
+                        <ItemIcon
+                          itemId={selectedSlots[index]!.id}
+                          itemName={selectedSlots[index]!.name}
+                          size={26}
+                          className="text-amber-800"
+                        />
                       </div>
                       <div className="mt-2 text-sm">{selectedSlots[index]!.name}</div>
                     </div>
