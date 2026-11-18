@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Item, Activity, ToolTier, EquipmentStats, ItemRarity } from '../types';
 import { getItemById } from '../data/items';
 import { getActivityById } from '../data/activities';
@@ -29,11 +29,12 @@ const RARITY_WEIGHTS: Record<ItemRarity, number> = {
 
 const SPECIAL_TYPE_WEIGHTS: Record<string, number> = {
   equipment: 3,
-  consumable: 5,
+  consumable: 25,
 };
 
 const EQUIPMENT_GATE_CHANCE = 0.03;
-const NOTE_GATE_CHANCE = 0.05;
+const NOTE_GATE_CHANCE = 0.18;
+const NOTE_PITY_THRESHOLD = 25;
 
 interface FindItemsResult {
   items: Item[];
@@ -78,6 +79,9 @@ const weightedRandomPick = (pool: Item[], luckBonus: number): Item | null => {
 export const useItemFinder = () => {
   const [recentlyFound, setRecentlyFound] = useState<Item[]>([]);
   const { state, dispatch } = useGame();
+  const runsSinceLastNote = useRef<Record<Activity, number>>({
+    farming: 0, fishing: 0, mining: 0, foraging: 0, cooking: 0,
+  });
 
   const resetRecentlyFound = useCallback(() => {
     setRecentlyFound([]);
@@ -150,11 +154,15 @@ export const useItemFinder = () => {
     }
 
     const equipmentGateRoll = Math.random() < (EQUIPMENT_GATE_CHANCE + equipLuckBonus * 0.02);
-    const noteGateRoll = Math.random() < (NOTE_GATE_CHANCE + equipLuckBonus * 0.03);
+    const pityActive = runsSinceLastNote.current[activity] >= NOTE_PITY_THRESHOLD;
     let foundSpecialDrop = false;
+    let foundNoteThisRun = false;
 
     for (let i = 0; i < itemCount; i++) {
       if (Math.random() < chance) {
+        const perSlotNoteOpen = pityActive ||
+          Math.random() < (NOTE_GATE_CHANCE + equipLuckBonus * 0.03);
+
         let itemPool = activityDetails.possibleItems
           .map(id => getItemById(id))
           .filter(Boolean) as Item[];
@@ -168,7 +176,8 @@ export const useItemFinder = () => {
           }
 
           if (item.recipeId) {
-            if (foundSpecialDrop || !noteGateRoll) return false;
+            if (foundSpecialDrop || foundNoteThisRun || !perSlotNoteOpen) return false;
+            if (state.discoveredRecipes.includes(item.recipeId)) return false;
           }
 
           if (activity === 'mining' && item.type === 'mineral') {
@@ -211,6 +220,9 @@ export const useItemFinder = () => {
           if (item.type === 'equipment' || item.recipeId) {
             foundSpecialDrop = true;
           }
+          if (item.recipeId) {
+            foundNoteThisRun = true;
+          }
 
           let quantity = item.stackable ? Math.floor(Math.random() * 3) + 1 : 1;
 
@@ -241,6 +253,12 @@ export const useItemFinder = () => {
           });
         }
       }
+    }
+
+    if (foundNoteThisRun) {
+      runsSinceLastNote.current[activity] = 0;
+    } else {
+      runsSinceLastNote.current[activity] += 1;
     }
 
     if (foundItems.length === 0) {

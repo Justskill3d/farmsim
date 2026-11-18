@@ -8,6 +8,7 @@ interface CardProps {
   footer?: ReactNode;
   hoverable?: boolean;
   bordered?: boolean;
+  overflow?: 'hidden' | 'visible';
 }
 
 const Card: React.FC<CardProps> = ({
@@ -17,11 +18,12 @@ const Card: React.FC<CardProps> = ({
   title,
   footer,
   hoverable = false,
-  bordered = true
+  bordered = true,
+  overflow = 'hidden'
 }) => {
   return (
     <div
-      className={`bg-amber-50 rounded-lg overflow-hidden ${
+      className={`bg-amber-50 rounded-lg ${overflow === 'visible' ? 'overflow-visible' : 'overflow-hidden'} ${
         bordered ? 'border-2 border-gray-200' : ''
       } ${
         hoverable ? 'transition-all hover:shadow-md hover:scale-[1.01]' : ''

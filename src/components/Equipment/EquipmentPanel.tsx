@@ -97,6 +97,7 @@ const EquipmentPanel: React.FC = () => {
           </div>
         }
         className="bg-amber-50"
+        overflow="visible"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">

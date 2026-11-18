@@ -95,6 +95,16 @@ export interface Notification {
   type: 'success' | 'error' | 'info';
 }
 
+export type DiscoveryKind = 'item' | 'recipe';
+
+export interface DiscoveryPayload {
+  kind: DiscoveryKind;
+  name: string;
+  rarity: ItemRarity;
+  description?: string;
+  recipeIngredients?: string;
+}
+
 export interface CraftingRecipe {
   id: string;
   name: string;
@@ -185,6 +195,7 @@ export interface GameState {
   equipment: Equipment;
   discoveredRecipes: string[];
   discoveredItems: string[];
+  discoveryQueue: DiscoveryPayload[];
   dailyEvent?: ActiveDailyEvent | null;
   pendingEncounter?: PendingEncounter | null;
   mysteryPackage?: MysteryPackageState | null;
@@ -235,4 +246,6 @@ export type GameAction =
   | { type: 'RESOLVE_ENCOUNTER'; payload: { optionId: string } }
   | { type: 'SET_MYSTERY_PACKAGE'; payload: MysteryPackageState | null }
   | { type: 'CLAIM_MYSTERY_PACKAGE'; payload: { optionId: string } }
-  | { type: 'ADD_GOLD'; payload: number };
+  | { type: 'ADD_GOLD'; payload: number }
+  | { type: 'QUEUE_DISCOVERY'; payload: DiscoveryPayload }
+  | { type: 'DISMISS_DISCOVERY' };

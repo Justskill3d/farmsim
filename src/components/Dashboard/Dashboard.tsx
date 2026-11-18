@@ -10,8 +10,9 @@ import UpgradesPanel from '../Upgrades/UpgradesPanel';
 import EquipmentPanel from '../Equipment/EquipmentPanel';
 import CraftingInterface from '../Crafting/CraftingInterface';
 import Footer from '../Footer/Footer';
-import { Sprout, Activity as ActivityIcon, Package, PenTool as Tool, Hammer, Shield, Save, Upload, Book, HelpCircle } from 'lucide-react';
+import { Sprout, Activity as ActivityIcon, Package, PenTool as Tool, Hammer, Shield, Save, Upload, Book, Circle as HelpCircle } from 'lucide-react';
 import CollectionGrid from '../Collection/CollectionGrid';
+import DiscoveryModal from '../UI/DiscoveryModal';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 
@@ -148,47 +149,19 @@ function Dashboard() {
   const isGameOver = day > 100 || money >= 1000000;
   const isInventoryFull = inventory.filter(Boolean).length >= inventorySize;
 
-  const getDashboardBackground = () => {
-    const timeOfDay = getTimeOfDay();
-    
-    const weatherClass = {
-      sunny: 'bg-gradient-to-b',
-      rainy: 'bg-gradient-to-b opacity-90',
-      stormy: 'bg-gradient-to-b opacity-80',
-      snowy: 'bg-gradient-to-b'
-    }[weather];
-    
-    const timeColors = {
-      morning: {
-        sunny: 'from-blue-200 to-amber-100',
-        rainy: 'from-gray-300 to-blue-200',
-        stormy: 'from-gray-700 to-gray-500',
-        snowy: 'from-gray-100 to-blue-50'
-      },
-      afternoon: {
-        sunny: 'from-blue-400 to-cyan-200',
-        rainy: 'from-gray-400 to-blue-300',
-        stormy: 'from-gray-800 to-gray-600',
-        snowy: 'from-gray-200 to-blue-100'
-      },
-      evening: {
-        sunny: 'from-orange-300 to-pink-200',
-        rainy: 'from-gray-500 to-indigo-300',
-        stormy: 'from-gray-900 to-gray-700',
-        snowy: 'from-indigo-200 to-blue-100'
-      },
-      night: {
-        sunny: 'from-indigo-900 to-purple-800',
-        rainy: 'from-gray-900 to-indigo-800',
-        stormy: 'from-gray-900 to-black',
-        snowy: 'from-gray-800 to-indigo-900'
-      }
-    };
-    
-    return `${weatherClass} ${timeColors[timeOfDay][weather]} transition-all duration-1000`;
+  type TimeOfDay = 'morning' | 'afternoon' | 'evening' | 'night';
+  type WeatherType = 'sunny' | 'rainy' | 'stormy' | 'snowy';
+
+  const gradientColors: Record<TimeOfDay, Record<WeatherType, [string, string]>> = {
+    morning:   { sunny: ['#bfdbfe','#fef3c7'], rainy: ['#d1d5db','#bfdbfe'], stormy: ['#374151','#6b7280'], snowy: ['#f3f4f6','#eff6ff'] },
+    afternoon: { sunny: ['#60a5fa','#a5f3fc'], rainy: ['#9ca3af','#93c5fd'], stormy: ['#1f2937','#4b5563'], snowy: ['#e5e7eb','#dbeafe'] },
+    evening:   { sunny: ['#fca5a1','#fbcfe8'], rainy: ['#6b7280','#a5b4fc'], stormy: ['#111827','#374151'], snowy: ['#c7d2fe','#dbeafe'] },
+    night:     { sunny: ['#312e81','#6b21a8'], rainy: ['#111827','#3730a3'], stormy: ['#111827','#000000'], snowy: ['#1f2937','#312e81'] },
   };
-  
-  const getTimeOfDay = () => {
+
+  const weatherOpacity: Record<WeatherType, number> = { sunny: 1, rainy: 0.9, stormy: 0.8, snowy: 1 };
+
+  const getTimeOfDay = (): TimeOfDay => {
     const { time } = state;
     if (time >= 360 && time < 720) return 'morning';
     if (time >= 720 && time < 960) return 'afternoon';
@@ -196,10 +169,39 @@ function Dashboard() {
     return 'night';
   };
 
-  const getTextColor = () => {
-    const timeOfDay = getTimeOfDay();
-    return timeOfDay === 'night' ? 'text-white' : 'text-gray-800';
-  };
+  const timeOfDay = getTimeOfDay();
+  const typedWeather = weather as WeatherType;
+
+  const [bgKey, setBgKey] = useState(() => `${timeOfDay}-${weather}`);
+  const [prevColors, setPrevColors] = useState<[string, string]>(() => gradientColors[timeOfDay][typedWeather]);
+  const [nextColors, setNextColors] = useState<[string, string] | null>(null);
+  const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    const newKey = `${timeOfDay}-${weather}`;
+    if (newKey === bgKey) return;
+    const incoming = gradientColors[timeOfDay][typedWeather];
+    setNextColors(incoming);
+    setFading(false);
+    // Trigger reflow so the transition fires
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setFading(true);
+      });
+    });
+    const timer = setTimeout(() => {
+      setPrevColors(incoming);
+      setNextColors(null);
+      setFading(false);
+      setBgKey(newKey);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [timeOfDay, weather]);
+
+  const [from, to] = prevColors;
+  const opacity = weatherOpacity[typedWeather];
+
+  const getTextColor = () => timeOfDay === 'night' ? 'text-white' : 'text-gray-800';
 
   if (isGameOver) {
     return (
@@ -226,8 +228,24 @@ function Dashboard() {
   }
 
   return (
-    <div className={`min-h-screen ${getDashboardBackground()}`}>
-      <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="min-h-screen relative">
+      {/* Base background layer */}
+      <div
+        className="absolute inset-0"
+        style={{ background: `linear-gradient(to bottom, ${from}, ${to})`, opacity }}
+      />
+      {/* Incoming background layer — fades in on time/weather change */}
+      {nextColors && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `linear-gradient(to bottom, ${nextColors[0]}, ${nextColors[1]})`,
+            opacity: fading ? opacity : 0,
+            transition: 'opacity 0.5s ease',
+          }}
+        />
+      )}
+      <div className="relative z-10 max-w-5xl mx-auto px-4 py-8">
         <header className={`mb-6 ${getTextColor()}`} id="welcome-message">
           <div className="flex justify-between items-center">
             <div>
@@ -237,7 +255,7 @@ function Dashboard() {
             <div className="flex items-center gap-4">
               <button
                 onClick={startTutorial}
-                className="flex items-center px-3 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors"
+                className="flex items-center px-3 py-2 bg-purple-400 text-white rounded-md hover:bg-purple-500 transition-colors"
                 title="Restart Tutorial"
               >
                 <HelpCircle size={16} className="mr-2" />
@@ -245,7 +263,7 @@ function Dashboard() {
               </button>
               <button
                 onClick={saveGame}
-                className="flex items-center px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                className="flex items-center px-3 py-2 bg-green-400 text-white rounded-md hover:bg-green-500 transition-colors"
               >
                 <Save size={16} className="mr-2" />
                 Save Game
@@ -395,7 +413,10 @@ function Dashboard() {
           </div>
         </div>
       </div>
-      <Footer />
+      <div className="relative z-10">
+        <Footer />
+      </div>
+      <DiscoveryModal />
     </div>
   );
 }

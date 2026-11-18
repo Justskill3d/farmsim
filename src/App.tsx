@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { GameProvider } from './context/GameContext';
 import Dashboard from './components/Dashboard/Dashboard';
 import Roadmap from './components/Roadmap/Roadmap';
+import Impressum from './components/Impressum/Impressum';
 import Notification from './components/UI/Notification';
 import PerkSelection from './components/PerkSelection/PerkSelection';
 import EventModal from './components/Events/EventModal';
@@ -16,6 +17,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/roadmap" element={<Roadmap />} />
+          <Route path="/impressum" element={<Impressum />} />
         </Routes>
         <Notification />
         <PerkSelection />

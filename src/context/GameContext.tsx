@@ -76,6 +76,7 @@ const initialState: GameState = {
   },
   discoveredRecipes: [],
   discoveredItems: [],
+  discoveryQueue: [],
   dailyEvent: null,
   pendingEncounter: null,
   mysteryPackage: null,
@@ -466,11 +467,16 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           ...state,
           inventory: newInventory,
           discoveredRecipes: [...state.discoveredRecipes, item.recipeId],
-          notification: {
-            title: 'Recipe Discovered!',
-            message: recipe ? `${recipe.name}: ${ingredientNames}` : 'A new recipe has been learned.',
-            type: 'success'
-          }
+          discoveryQueue: [
+            ...(state.discoveryQueue || []),
+            {
+              kind: 'recipe' as const,
+              name: recipe ? recipe.name : item.name,
+              rarity: item.rarity,
+              description: recipe ? recipe.description : undefined,
+              recipeIngredients: ingredientNames || undefined,
+            },
+          ],
         };
       }
 
@@ -899,6 +905,18 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         discoveredItems: state.discoveredItems.includes(action.payload)
           ? state.discoveredItems
           : [...state.discoveredItems, action.payload]
+      };
+
+    case 'QUEUE_DISCOVERY':
+      return {
+        ...state,
+        discoveryQueue: [...(state.discoveryQueue || []), action.payload]
+      };
+
+    case 'DISMISS_DISCOVERY':
+      return {
+        ...state,
+        discoveryQueue: (state.discoveryQueue || []).slice(1)
       };
 
     default:

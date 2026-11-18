@@ -24,7 +24,9 @@ export const activities: ActivityDetails[] = [
       'parsnip', 'potato', 'cauliflower', 'melon', 'pumpkin', 'starfruit', 'ancient_fruit',
       'parsnip_seeds', 'potato_seeds', 'cauliflower_seeds', 'melon_seeds', 'pumpkin_seeds',
       'starfruit_seeds', 'ancient_fruit_seeds',
-      'note_ring_of_harvest', 'note_wooden_amulet', 'note_leather_gloves', 'note_leather_belt'
+      'note_ring_of_harvest', 'note_wooden_amulet', 'note_leather_gloves', 'note_leather_belt',
+      'note_blackberry_pie', 'note_pumpkin_pie', 'note_pumpkin_soup', 'note_melon_sorbet',
+      'note_starfruit_jelly', 'note_ancient_wine'
     ],
     requiredTool: 'hoe'
   },
@@ -40,7 +42,8 @@ export const activities: ActivityDetails[] = [
       'anchovy', 'sardine', 'tuna', 'salmon', 'catfish', 'sturgeon', 'legendary_fish',
       'pearl',
       'ring_of_tides',
-      'note_ring_of_tides', 'note_fish_stew', 'note_lucky_lunch'
+      'note_ring_of_tides', 'note_fish_stew', 'note_lucky_lunch',
+      'note_catfish_chowder', 'note_sturgeon_caviar', 'note_legendary_feast'
     ],
     requiredTool: 'fishing_rod'
   },
@@ -72,9 +75,10 @@ export const activities: ActivityDetails[] = [
       'dry_leave', 'hide', 'water',
       'wild_horseradish', 'spring_onion', 'blackberry', 'mushroom', 'truffle',
       'golden_walnut', 'wood', 'hardwood', 'fiber',
-      'herbs', 'wild_garlic', 'bay_leaf',
+      'herbs', 'wild_garlic', 'bay_leaf', 'egg',
       'ring_of_the_wild', 'leather_gloves', 'wooden_amulet',
-      'note_ring_of_the_wild', 'note_champions_belt', 'note_seafood_gumbo'
+      'note_ring_of_the_wild', 'note_champions_belt', 'note_seafood_gumbo',
+      'note_truffle_risotto', 'note_walnut_cake'
     ],
     requiredTool: 'axe'
   },
@@ -87,7 +91,9 @@ export const activities: ActivityDetails[] = [
     iconName: 'Utensils',
     possibleItems: [
       'flour', 'butter', 'oil', 'sugar', 'rice',
-      'note_complete_breakfast', 'note_seafood_gumbo'
+      'note_complete_breakfast', 'note_seafood_gumbo',
+      'note_blackberry_pie', 'note_pumpkin_pie', 'note_pumpkin_soup',
+      'note_melon_sorbet', 'note_starfruit_jelly', 'note_ancient_wine', 'note_walnut_cake'
     ]
   }
 ];

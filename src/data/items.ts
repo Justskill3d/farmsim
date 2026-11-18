@@ -125,6 +125,7 @@ export const foraged: Item[] = [
   createItem('wild_garlic', 'Wild Garlic', 'Adds flavor to dishes.', 'foraged', 35, 'common'),
   createItem('bay_leaf', 'Bay Leaf', 'A fragrant leaf for seasoning.', 'foraged', 30, 'common'),
   createItem('water', 'Fresh Water', 'Clean water for cooking and crafting.', 'foraged', 5, 'common', true, 99),
+  createItem('egg', 'Egg', 'A fresh egg found while foraging. Perfect for cooking.', 'foraged', 20, 'common'),
 ];
 
 // 6. Resources
@@ -203,6 +204,93 @@ export const meals: Item[] = [
       skill: 'cooking',
       amount: 25
     }
+  }),
+  // New meals
+  createItem('blackberry_pie', 'Blackberry Pie', 'A sweet and tart pie filled with wild blackberries.', 'meal', 180, 'common', true, 99, undefined, undefined, {
+    energy: 35,
+    experience: 22,
+    skillBonus: { skill: 'foraging', amount: 8 }
+  }),
+  createItem('pumpkin_pie', 'Pumpkin Pie', 'A classic fall dessert with spiced pumpkin filling.', 'meal', 340, 'uncommon', true, 99, undefined, undefined, {
+    energy: 55,
+    experience: 30,
+    skillBonus: { skill: 'farming', amount: 15 }
+  }),
+  createItem('pumpkin_soup', 'Pumpkin Soup', 'A thick, warming autumn soup.', 'meal', 260, 'uncommon', true, 99, undefined, undefined, {
+    energy: 45,
+    experience: 25,
+    skillBonus: { skill: 'farming', amount: 10 }
+  }),
+  createItem('melon_sorbet', 'Melon Sorbet', 'A refreshing chilled dessert of sweet summer melon.', 'meal', 310, 'uncommon', true, 99, undefined, undefined, {
+    energy: 40,
+    experience: 22,
+    skillBonus: { skill: 'farming', amount: 8 }
+  }),
+  createItem('starfruit_jelly', 'Starfruit Jelly', 'A shimmering, jewel-toned preserve.', 'meal', 480, 'rare', true, 99, undefined, undefined, {
+    energy: 60,
+    experience: 35,
+    skillBonus: { skill: 'farming', amount: 20 }
+  }),
+  createItem('ancient_wine', 'Ancient Wine', 'A legendary ferment brewed from forgotten fruit.', 'meal', 1200, 'epic', true, 99, undefined, undefined, {
+    energy: 100,
+    experience: 60,
+    skillBonus: { skill: 'farming', amount: 30 }
+  }),
+  createItem('roasted_cauliflower', 'Roasted Cauliflower', 'Golden-edged florets drizzled with oil.', 'meal', 185, 'common', true, 99, undefined, undefined, {
+    energy: 30,
+    experience: 18,
+    skillBonus: { skill: 'farming', amount: 7 }
+  }),
+  createItem('anchovy_pasta', 'Anchovy Pasta', 'Savory pasta tossed with briny anchovies.', 'meal', 170, 'common', true, 99, undefined, undefined, {
+    energy: 35,
+    experience: 18,
+    skillBonus: { skill: 'fishing', amount: 8 }
+  }),
+  createItem('sardine_toast', 'Sardine Toast', 'Crispy bread topped with sardines.', 'meal', 155, 'common', true, 99, undefined, undefined, {
+    energy: 28,
+    experience: 15,
+    skillBonus: { skill: 'fishing', amount: 6 }
+  }),
+  createItem('catfish_chowder', 'Catfish Chowder', 'A rich, creamy chowder with tender catfish.', 'meal', 420, 'rare', true, 99, undefined, undefined, {
+    energy: 65,
+    experience: 38,
+    skillBonus: { skill: 'fishing', amount: 22 }
+  }),
+  createItem('sturgeon_caviar', 'Sturgeon Caviar', 'Prized roe from the ancient sturgeon, lightly salted.', 'meal', 680, 'rare', true, 99, undefined, undefined, {
+    energy: 70,
+    experience: 45,
+    skillBonus: { skill: 'fishing', amount: 25 }
+  }),
+  createItem('legendary_feast', 'Legendary Feast', 'A mythical banquet centered on the legendary fish.', 'meal', 3500, 'legendary', true, 99, undefined, undefined, {
+    energy: 150,
+    experience: 100,
+    skillBonus: { skill: 'fishing', amount: 50 }
+  }),
+  createItem('garlic_bread', 'Garlic Bread', 'Crusty bread infused with wild garlic butter.', 'meal', 120, 'common', true, 99, undefined, undefined, {
+    energy: 25,
+    experience: 14
+  }),
+  createItem('garlic_butter', 'Garlic Butter', 'Creamy butter whipped with wild garlic.', 'meal', 90, 'common', true, 99, undefined, undefined, {
+    energy: 18,
+    experience: 10
+  }),
+  createItem('herb_broth', 'Herb Broth', 'A delicate aromatic broth with bay leaf.', 'meal', 75, 'common', true, 99, undefined, undefined, {
+    energy: 20,
+    experience: 12
+  }),
+  createItem('truffle_risotto', 'Truffle Risotto', 'Silky rice perfumed with rare truffle.', 'meal', 780, 'rare', true, 99, undefined, undefined, {
+    energy: 85,
+    experience: 50,
+    skillBonus: { skill: 'foraging', amount: 28 }
+  }),
+  createItem('walnut_cake', 'Walnut Cake', 'A rich cake studded with golden walnuts.', 'meal', 950, 'epic', true, 99, undefined, undefined, {
+    energy: 90,
+    experience: 55,
+    skillBonus: { skill: 'foraging', amount: 30 }
+  }),
+  createItem('sweet_jam', 'Sweet Blackberry Jam', 'A glossy preserve bursting with blackberry sweetness.', 'meal', 140, 'common', true, 99, undefined, undefined, {
+    energy: 22,
+    experience: 14
   }),
 ];
 
@@ -566,6 +654,73 @@ export const recipeNotes: Item[] = [
     description: '"Start with the stew of the sea, then stir in freshly picked forest herbs. Let it simmer until magic."',
     value: 2000, rarity: 'rare', stackable: true, maxStackSize: 99,
     imageUrl: 'public/assets/items/note_seafood_gumbo.png', recipeId: 'seafood_gumbo'
+  },
+  // New cooking recipe notes
+  {
+    id: 'note_blackberry_pie', name: 'Harvest Fair Recipe Card', type: 'consumable',
+    description: '"Fold those dark fall berries into dough and bake until the crust turns golden-brown."',
+    value: 300, rarity: 'common', stackable: true, maxStackSize: 99,
+    imageUrl: 'public/assets/items/note_blackberry_pie.png', recipeId: 'blackberry_pie'
+  },
+  {
+    id: 'note_pumpkin_pie', name: 'Grandma\'s Autumn Ledger', type: 'consumable',
+    description: '"Scoop the orange flesh, spice it well, lay it into dough, and bake by the hearth."',
+    value: 600, rarity: 'uncommon', stackable: true, maxStackSize: 99,
+    imageUrl: 'public/assets/items/note_pumpkin_pie.png', recipeId: 'pumpkin_pie'
+  },
+  {
+    id: 'note_pumpkin_soup', name: 'Innkeeper\'s Scrawl', type: 'consumable',
+    description: '"Simmer the pumpkin in vegetable broth until soft enough to stir into a thick soup."',
+    value: 400, rarity: 'uncommon', stackable: true, maxStackSize: 99,
+    imageUrl: 'public/assets/items/note_pumpkin_soup.png', recipeId: 'pumpkin_soup'
+  },
+  {
+    id: 'note_melon_sorbet', name: 'Summer Festival Pamphlet', type: 'consumable',
+    description: '"Blend sweet summer melon with pure sugar and freeze until smooth."',
+    value: 500, rarity: 'uncommon', stackable: true, maxStackSize: 99,
+    imageUrl: 'public/assets/items/note_melon_sorbet.png', recipeId: 'melon_sorbet'
+  },
+  {
+    id: 'note_starfruit_jelly', name: 'Confectioner\'s Journal', type: 'consumable',
+    description: '"The starfruit\'s tartness melts into sugar over gentle heat to form a luminous preserve."',
+    value: 800, rarity: 'rare', stackable: true, maxStackSize: 99,
+    imageUrl: 'public/assets/items/note_starfruit_jelly.png', recipeId: 'starfruit_jelly'
+  },
+  {
+    id: 'note_ancient_wine', name: 'Crumbling Winery Scroll', type: 'consumable',
+    description: '"The ancient fruit, sweetened and left to ferment, yields a vintage unlike anything of this era."',
+    value: 2000, rarity: 'epic', stackable: true, maxStackSize: 99,
+    imageUrl: 'public/assets/items/note_ancient_wine.png', recipeId: 'ancient_wine'
+  },
+  {
+    id: 'note_catfish_chowder', name: 'Riverman\'s Cooking Notes', type: 'consumable',
+    description: '"A slippery catfish, simmered long in broth, yields a chowder fit for a cold evening."',
+    value: 700, rarity: 'rare', stackable: true, maxStackSize: 99,
+    imageUrl: 'public/assets/items/note_catfish_chowder.png', recipeId: 'catfish_chowder'
+  },
+  {
+    id: 'note_sturgeon_caviar', name: 'Delicacy Trade Card', type: 'consumable',
+    description: '"Harvest the ancient fish\'s roe and cure with a pinch of salt for a luxury few have tasted."',
+    value: 1000, rarity: 'rare', stackable: true, maxStackSize: 99,
+    imageUrl: 'public/assets/items/note_sturgeon_caviar.png', recipeId: 'sturgeon_caviar'
+  },
+  {
+    id: 'note_legendary_feast', name: 'Mythic Banquet Tablet', type: 'consumable',
+    description: '"The legendary fish, adorned with sacred herbs, feeds an entire village and grants the blessing of the deep."',
+    value: 5000, rarity: 'legendary', stackable: true, maxStackSize: 99,
+    imageUrl: 'public/assets/items/note_legendary_feast.png', recipeId: 'legendary_feast'
+  },
+  {
+    id: 'note_truffle_risotto', name: 'Forest Chef\'s Torn Page', type: 'consumable',
+    description: '"Fold slivers of rare truffle through slow-stirred rice. The forest will reward your patience."',
+    value: 1200, rarity: 'rare', stackable: true, maxStackSize: 99,
+    imageUrl: 'public/assets/items/note_truffle_risotto.png', recipeId: 'truffle_risotto'
+  },
+  {
+    id: 'note_walnut_cake', name: 'Golden Recipe Inscription', type: 'consumable',
+    description: '"Knead golden walnuts into sweet dough and bake until fragrant. A cake worthy of the valley\'s finest table."',
+    value: 1500, rarity: 'epic', stackable: true, maxStackSize: 99,
+    imageUrl: 'public/assets/items/note_walnut_cake.png', recipeId: 'walnut_cake'
   },
 ];
 

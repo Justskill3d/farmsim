@@ -49,7 +49,7 @@ const components: CraftingRecipe[] = [
       name: 'Vegetable Broth',
       description: 'A flavorful cooking base.',
       type: 'component',
-      value: 40,
+      value: 105,
       rarity: 'common',
       stackable: true,
       maxStackSize: 99
@@ -149,9 +149,9 @@ const meals: CraftingRecipe[] = [
   {
     id: 'fried_egg',
     name: 'Fried Egg',
-    description: 'A simple breakfast fried in butter and oil.',
+    description: 'Crack an egg into a pan of melted butter.',
     category: 'meal',
-    ingredients: ['butter', 'oil'],
+    ingredients: ['egg', 'butter'],
     result: getItemById('fried_egg') || {
       id: 'fried_egg',
       name: 'Fried Egg',
@@ -319,13 +319,154 @@ const meals: CraftingRecipe[] = [
       effects: {
         energy: 80,
         experience: 45,
-        skillBonus: {
-          skill: 'cooking',
-          amount: 25
-        }
+        skillBonus: { skill: 'cooking', amount: 25 }
       }
     }
-  }
+  },
+  {
+    id: 'blackberry_pie',
+    name: 'Blackberry Pie',
+    description: 'Fold wild blackberries into dough and bake until golden.',
+    category: 'meal',
+    ingredients: ['blackberry', 'dough'],
+    result: getItemById('blackberry_pie')!
+  },
+  {
+    id: 'pumpkin_pie',
+    name: 'Pumpkin Pie',
+    description: 'Spiced pumpkin filling baked in a flaky dough crust.',
+    category: 'meal',
+    ingredients: ['pumpkin', 'dough'],
+    result: getItemById('pumpkin_pie')!
+  },
+  {
+    id: 'pumpkin_soup',
+    name: 'Pumpkin Soup',
+    description: 'Pumpkin simmered in vegetable broth until velvety smooth.',
+    category: 'meal',
+    ingredients: ['pumpkin', 'broth'],
+    result: getItemById('pumpkin_soup')!
+  },
+  {
+    id: 'melon_sorbet',
+    name: 'Melon Sorbet',
+    description: 'Blended sweet melon churned with sugar into a chilled treat.',
+    category: 'meal',
+    ingredients: ['melon', 'sugar'],
+    result: getItemById('melon_sorbet')!
+  },
+  {
+    id: 'starfruit_jelly',
+    name: 'Starfruit Jelly',
+    description: 'Starfruit dissolved in sugar to make a shimmering preserve.',
+    category: 'meal',
+    ingredients: ['starfruit', 'sugar'],
+    result: getItemById('starfruit_jelly')!
+  },
+  {
+    id: 'ancient_wine',
+    name: 'Ancient Wine',
+    description: 'Ancient fruit fermented with sugar into a legendary vintage.',
+    category: 'meal',
+    ingredients: ['ancient_fruit', 'sugar'],
+    result: getItemById('ancient_wine')!
+  },
+  {
+    id: 'roasted_cauliflower',
+    name: 'Roasted Cauliflower',
+    description: 'Cauliflower florets roasted in cooking oil until caramelized.',
+    category: 'meal',
+    ingredients: ['cauliflower', 'oil'],
+    result: getItemById('roasted_cauliflower')!
+  },
+  {
+    id: 'anchovy_pasta',
+    name: 'Anchovy Pasta',
+    description: 'Flour pasta tossed with briny anchovies.',
+    category: 'meal',
+    ingredients: ['anchovy', 'flour'],
+    result: getItemById('anchovy_pasta')!
+  },
+  {
+    id: 'sardine_toast',
+    name: 'Sardine Toast',
+    description: 'Sardines layered over fresh-baked dough.',
+    category: 'meal',
+    ingredients: ['sardine', 'dough'],
+    result: getItemById('sardine_toast')!
+  },
+  {
+    id: 'catfish_chowder',
+    name: 'Catfish Chowder',
+    description: 'Catfish slow-simmered in rich vegetable broth.',
+    category: 'meal',
+    ingredients: ['catfish', 'broth'],
+    result: getItemById('catfish_chowder')!
+  },
+  {
+    id: 'sturgeon_caviar',
+    name: 'Sturgeon Caviar',
+    description: 'Sturgeon roe cured with a pinch of salt.',
+    category: 'meal',
+    ingredients: ['sturgeon', 'salt'],
+    result: getItemById('sturgeon_caviar')!
+  },
+  {
+    id: 'legendary_feast',
+    name: 'Legendary Feast',
+    description: 'The legendary fish adorned with fresh herbs for a mythic banquet.',
+    category: 'meal',
+    ingredients: ['legendary_fish', 'herbs'],
+    result: getItemById('legendary_feast')!
+  },
+  {
+    id: 'garlic_bread',
+    name: 'Garlic Bread',
+    description: 'Wild garlic kneaded into dough and baked to crusty perfection.',
+    category: 'meal',
+    ingredients: ['wild_garlic', 'dough'],
+    result: getItemById('garlic_bread')!
+  },
+  {
+    id: 'garlic_butter',
+    name: 'Garlic Butter',
+    description: 'Wild garlic whipped into soft butter.',
+    category: 'meal',
+    ingredients: ['wild_garlic', 'butter'],
+    result: getItemById('garlic_butter')!
+  },
+  {
+    id: 'herb_broth',
+    name: 'Herb Broth',
+    description: 'Bay leaf steeped in fresh water for a delicate aromatic base.',
+    category: 'meal',
+    ingredients: ['bay_leaf', 'water'],
+    result: getItemById('herb_broth')!
+  },
+  {
+    id: 'truffle_risotto',
+    name: 'Truffle Risotto',
+    description: 'Slow-stirred rice finished with rare shaved truffle.',
+    category: 'meal',
+    ingredients: ['truffle', 'rice'],
+    result: getItemById('truffle_risotto')!
+  },
+  {
+    id: 'walnut_cake',
+    name: 'Walnut Cake',
+    description: 'Golden walnuts baked into a rich, dense dough cake.',
+    category: 'meal',
+    ingredients: ['golden_walnut', 'dough'],
+    result: getItemById('walnut_cake')!
+  },
+  {
+    id: 'sweet_jam',
+    name: 'Sweet Blackberry Jam',
+    description: 'Blackberries cooked down with sugar into a glossy preserve.',
+    category: 'meal',
+    ingredients: ['blackberry', 'sugar'],
+    result: getItemById('sweet_jam')!
+  },
 ];
 
 // Armor recipes — each piece uses a unique ingredient pair so findRecipe() resolves unambiguously
